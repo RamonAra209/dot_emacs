@@ -280,6 +280,11 @@
 
 ;; Org 
 (leader-key-def "o a" 'org-agenda)
+(use-package org-download
+  :straight t
+  :init
+  (add-hook 'dired-mode-hook 'org-download-enable))
+
 
 ;; Misc
 (eldoc-mode -1)
