@@ -34,6 +34,7 @@
   :config
   (general-auto-unbind-keys)
   (general-evil-setup)
+  (general-unbind 'normal dired-mode-map "SPC")
 
   (general-create-definer leader-key-def
     :keymaps '(normal insert visual emacs)
