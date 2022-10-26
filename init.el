@@ -266,9 +266,7 @@
       (define-key map (kbd "M-7") 'winum-select-window-7)
       (define-key map (kbd "M-8") 'winum-select-window-8)
       map))
-(require 'winum)
-(winum-mode)
-
+(use-package winum :straight t :init (winum-mode))
 
 ;; Projectile
 (use-package projectile
