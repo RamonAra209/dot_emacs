@@ -59,12 +59,15 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-
+(use-package rainbow-delimiters
+  :straight t
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;;; Key Bindings
 (global-set-key (kbd "M-/") 'comment-line)
 (electric-pair-mode)
 (use-package undo-fu)
+(use-package undo-fu-session :straight t :init (global-undo-fu-session-mode))
 (use-package evil
   :demand t
   :bind (("<escape>" . keyboard-escape-quit))
@@ -100,7 +103,12 @@
 
 
 ;; Minibuffer
-(use-package vertico :init (vertico-mode))
+(use-package vertico
+  :config
+  (vertico-mode)
+  :bind (:map vertico-map
+	      ("DEL" . #'vertico-directory-delete-char)
+	      ("DEL" . #'vertico-directory-delete-word)))
 (use-package consult)
 (use-package marginalia
   :bind (("M-A" . marginalia-cycle)
@@ -276,6 +284,12 @@
 
 ;; Misc
 (eldoc-mode -1)
+
+(add-hook 'prog-mode-hook 'hl-line-mode)
+(add-hook 'text-mode-hook 'hl-line-mode)
+
+(setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) 
+
 
 ;; Key Maps
 (leader-key-def
