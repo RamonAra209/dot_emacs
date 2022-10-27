@@ -251,10 +251,10 @@
   (setq rustic-cargo-bin "~/.cargo/bin/cargo")
   )
 
-(use-package lsp-ui
-  :straight t
-  :config
-  (setq lsp-ui-sideline-enable t))
+;; (use-package lsp-ui
+;;   :straight t
+;;   :config
+;;   (setq lsp-ui-sideline-enable t))
 
 (use-package yasnippet
   :straight t
