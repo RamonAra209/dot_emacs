@@ -34,6 +34,7 @@
   :config
   (general-auto-unbind-keys)
   (general-evil-setup)
+
   (general-unbind 'normal dired-mode-map "SPC")
 
   (general-create-definer leader-key-def
@@ -60,9 +61,15 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+
 (use-package rainbow-delimiters
   :straight t
   :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package beacon
+  :straight t
+  :init
+  (beacon-mode))
 
 ;;; Key Bindings
 (global-set-key (kbd "M-/") 'comment-line)
@@ -84,7 +91,8 @@
   :after evil
   :config
   (setq evil-want-integration t)
-
+  (setq evil-respect-visual-line-mode t)
+  :init
   (evil-collection-init))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -99,8 +107,19 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
 (use-package evil-multiedit)
 (evil-multiedit-default-keybinds)
+
+(use-package evil-goggles
+  :straight t
+  :custom
+  (setq evil-goggles-duration 0.150)
+  (setq evil-goggles-enable-change t)
+  (setq evil-goggles-enable-delete t)
+  :config
+  (evil-goggles-mode)
+  (evil-goggles-use-diff-faces))
 
 
 ;; Minibuffer
@@ -109,8 +128,12 @@
   (vertico-mode)
   :bind (:map vertico-map
 	      ("DEL" . #'vertico-directory-delete-char)
-	      ("DEL" . #'vertico-directory-delete-word)))
+	      ;; ("DEL" . #'vertico-directory-delete-word)
+  ))
+
 (use-package consult)
+(leader-key-def "h t" 'consult-theme)
+
 (use-package marginalia
   :bind (("M-A" . marginalia-cycle)
          :map minibuffer-local-map
@@ -138,6 +161,7 @@
 
 
 ;; Dired + Buffer
+;; (add-hook 'dired-mode-hook (lambda () (local-unset-key (kbd "SPC"))))
 (leader-key-def "f f" 'find-file)
 (leader-key-def "." 'find-file)
 (leader-key-def "," 'switch-to-buffer)
@@ -221,12 +245,13 @@
 
 
 ;; Theme
+(use-package ef-themes
+  :straight t)
 (use-package doom-themes
   :ensure t
   :config
   (setq doom-themes-enable-bold t    
         doom-themes-enable-italic t) 
-  (load-theme 'doom-old-hope t)
 
   (doom-themes-visual-bell-config)
   (doom-themes-neotree-config)
@@ -237,6 +262,9 @@
 ;;  `(line-number ((t (:background '#708090))))
 ;;  `(line-number-current-line((t (:foreground '#ef7c2b)))))
   )
+
+(load-theme 'ef-dark t)
+;; (load-theme 'doom-old-hope t)
 
 ;; Modeline
 (use-package doom-modeline
@@ -278,13 +306,12 @@
   (leader-key-def "SPC" 'projectile-find-file)
     )
 
-;; Org 
+;; Org Mode
 (leader-key-def "o a" 'org-agenda)
 (use-package org-download
   :straight t
   :init
   (add-hook 'dired-mode-hook 'org-download-enable))
-
 
 ;; Misc
 (eldoc-mode -1)
@@ -309,3 +336,4 @@
  (leader-key-def "m v a" 'pyvenv-activate)
  (leader-key-def "m v d" 'pyvenv-deactivate)
  (leader-key-def "m v m" 'pyvenv-menu))
+
