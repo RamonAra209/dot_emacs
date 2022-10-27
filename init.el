@@ -1,3 +1,5 @@
+;; git clone --depth 1 git@github.com:RamonAra209/dot_emacs.git ~/.emacs.d
+
 ;; Straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
