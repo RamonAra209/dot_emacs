@@ -22,17 +22,25 @@
     (load custom-file))
 
 
-;; Mac keybindings
+;; Mac-Specific Settings
 (when (eq system-type 'darwin) 
   (setq mac-option-modifier 'alt)
   (setq mac-command-modifier 'meta)
   (global-set-key [kp-delete] 'delete-char))
 
+(use-package default-text-scale
+  :straight t
+  :config
+  (global-set-key (kbd "M-=") 'default-text-scale-increase)
+  (global-set-key (kbd "M--") 'default-text-scale-decrease))
+
+(global-set-key (kbd "M-q") 'save-buffers-kill-emacs)
+(global-set-key (kbd "M-h") 'ns-do-hide-emacs)
+(add-hook 'window-setup-hook 'toggle-frame-maximized t)
 
 ;; General 
 (use-package general
   :straight t
-  :ensure t
   :config
   (general-auto-unbind-keys)
   (general-evil-setup)
@@ -72,6 +80,15 @@
   :straight t
   :init
   (beacon-mode))
+
+(use-package dashboard
+  :straight t
+  :config
+  (dashboard-setup-startup-hook)
+  (add-to-list 'dashboard-items '(agenda) t)
+  (setq dashboard-center-content t)
+  (setq dashboard-banner-logo-title "Go change the world, one line at a time")
+  )
 
 ;;; Key Bindings
 (global-set-key (kbd "M-/") 'comment-line)
@@ -310,6 +327,13 @@
 
 ;; Org Mode
 (leader-key-def "o a" 'org-agenda)
+(setq org-agenda-files (apply 'append
+        (mapcar
+            (lambda (directory)
+                (directory-files-recursively
+                directory org-agenda-file-regexp))
+        '("~/Developer/" "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org"))))
+
 (use-package org-download
   :straight t
   :init
