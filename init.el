@@ -212,6 +212,8 @@
 
 
 ;; Completion
+;; (setq python-shell-exec-path "/opt/homebrew/bin/python3.11")
+
 (use-package corfu
   :custom
   (corfu-auto t)
@@ -223,22 +225,23 @@
   :init
   (global-corfu-mode))
 
-(use-package lsp-mode
-  :straight t
-  :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-c l")
-  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (python-mode . lsp)
-         ;; if you want which-key integration
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
+(use-package eglot :straight t)
+;; (use-package lsp-mode
+;;   :straight t
+;;   :init
+;;   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+;;   (setq lsp-keymap-prefix "C-c l")
+;;   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+;;          (python-mode . lsp)
+;;          ;; if you want which-key integration
+;;          (lsp-mode . lsp-enable-which-key-integration))
+;;   :commands lsp)
 
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+;; (use-package lsp-pyright
+;;   :ensure t
+;;   :hook (python-mode . (lambda ()
+;;                           (require 'lsp-pyright)
+;;                           (lsp))))  ; or lsp-deferred
 
 (use-package pyvenv)
 
@@ -254,6 +257,7 @@
   (setq lsp-ui-sideline-enable t))
 
 (use-package yasnippet
+  :straight t
   :config
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode))
@@ -281,7 +285,6 @@
 ;;  `(line-number ((t (:background '#708090))))
 ;;  `(line-number-current-line((t (:foreground '#ef7c2b)))))
   )
-
 (load-theme 'ef-dark t)
 ;; (load-theme 'doom-old-hope t)
 
