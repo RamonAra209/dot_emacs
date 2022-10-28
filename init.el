@@ -67,7 +67,11 @@
 
 ;; Visual
 (setq display-line-numbers-type 'visual)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(dolist (mode '(text-mode-hook
+                prog-mode-hook
+                org-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 1))))
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
