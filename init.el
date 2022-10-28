@@ -324,8 +324,34 @@
   :custom
   (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
-  (leader-key-def "SPC" 'projectile-find-file)
-    )
+  (leader-key-def "SPC" 'projectile-find-file))
+
+
+;; Terminal
+(use-package vterm
+  :straight t)
+
+(use-package vterm-toggle
+  :straight t
+  :config
+  (setq vterm-toggle-fullscreen-p nil)
+  (add-to-list 'display-buffer-alist
+	       '((lambda (buffer-or-name _)
+		   (let ((buffer (get-buffer buffer-or-name)))
+		     (with-current-buffer buffer
+		       (or (equal major-mode 'vterm-mode)
+			   (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+		 (display-buffer-reuse-window display-buffer-at-bottom)
+		 ;;(display-buffer-reuse-window display-buffer-in-direction)
+		 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+		 ;;(direction . bottom)
+		 ;;(dedicated . t) ;dedicated is supported in emacs27
+		 (reusable-frames . visible)
+		 (window-height . 0.3)))
+
+  (leader-key-def "o t" 'vterm-toggle)
+)
+
 
 ;; Org Mode
 (leader-key-def "o a" 'org-agenda)
@@ -365,3 +391,7 @@
  (leader-key-def "m v d" 'pyvenv-deactivate)
  (leader-key-def "m v m" 'pyvenv-menu))
 
+
+(general-imap
+  :keymaps 'vterm-mode-map
+  "C-c" 'vterm-send-C-c)
