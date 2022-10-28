@@ -90,11 +90,14 @@
   (setq dashboard-banner-logo-title "Go change the world, one line at a time")
   )
 
-;;; Key Bindings
+;;; Key Bindings 
 (global-set-key (kbd "M-/") 'comment-line)
 (electric-pair-mode)
+
 (use-package undo-fu)
+
 (use-package undo-fu-session :straight t :init (global-undo-fu-session-mode))
+
 (use-package evil
   :demand t
   :bind (("<escape>" . keyboard-escape-quit))
@@ -139,6 +142,11 @@
   :config
   (evil-goggles-mode)
   (evil-goggles-use-diff-faces))
+
+(use-package evil-snipe
+  :straight t
+  :init
+  (evil-snipe-mode))
 
 
 ;; Minibuffer
