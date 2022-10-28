@@ -362,18 +362,45 @@
 
 
 ;; Org Mode
-(leader-key-def "o a" 'org-agenda)
-(setq org-agenda-files (apply 'append
-        (mapcar
-            (lambda (directory)
-                (directory-files-recursively
-                directory org-agenda-file-regexp))
-        '("~/Developer/" "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org"))))
+(use-package org
+  :defer t
+  :custom 
+  (setq org-agenda-files (apply 'append
+				(mapcar
+				 (lambda (directory)
+				   (directory-files-recursively
+				    directory org-agenda-file-regexp))
+				 '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
+				 )))
+  :config
+  (leader-key-def "o a" 'org-agenda)
 
-(use-package org-download
-  :straight t
-  :init
-  (add-hook 'dired-mode-hook 'org-download-enable))
+  (use-package org-download
+    :straight t
+    :init
+    (add-hook 'dired-mode-hook 'org-download-enable))
+
+
+  (use-package toc-org
+    :straight t
+    :config
+    (if (require 'toc-org nil t)
+	(progn
+	  (add-hook 'org-mode-hook 'toc-org-mode)
+
+	  ;; enable in markdown, too
+	  (add-hook 'markdown-mode-hook 'toc-org-mode)
+	  (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+      (warn "toc-org not found")))
+
+  (use-package org-bullets
+    :straight t)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+  :hook
+  (org-mode . org-indent-mode)
+  )
+
 
 ;; Misc
 (eldoc-mode -1)
@@ -398,7 +425,6 @@
  (leader-key-def "m v a" 'pyvenv-activate)
  (leader-key-def "m v d" 'pyvenv-deactivate)
  (leader-key-def "m v m" 'pyvenv-menu))
-
 
 (general-imap
   :keymaps 'vterm-mode-map
