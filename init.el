@@ -425,13 +425,19 @@
 			     (66 :foreground "#0098dd")
 			     (67 :foreground "#da8548")))
 
-
   (setq org-ellipsis "  ⬎ ")
   (setq org-startup-folded 'show2levels)
   (setq org-hide-emphasis-markers t)
   (setq org-list-demote-modify-bullet
 	'(("+" . "*") ("*" . "-") ("-" . "+")))
 
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 
   (use-package org-download
     :straight t
