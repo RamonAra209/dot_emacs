@@ -364,24 +364,79 @@
 
 
 ;; Org Mode
+(setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
+			      (mapcar
+			       (lambda (directory)
+				 (directory-files-recursively
+				  directory org-agenda-file-regexp))
+			       '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
+			       )))
+(setq org-todo-keywords
+      (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
+
+(leader-key-def "X" 'org-capture)
+(setq org-capture-templates
+      '(
+        ;; ("t" "General Todo" entry (file+headline "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org/gtd.org" "Tasks")
+        ;;  "* TODO %?\n  %i\n  %a")
+        ("t" "General Todo")
+            ("te" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+
+            ("ts" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+
+            ("td" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+
+            ("tw" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+        ("j" "Journal" entry (file+datetree "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")
+        ("w" "Work Todo Entries")
+            ("we" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+
+            ("ws" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+
+            ("wd" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+
+            ("ww" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+            )
+)
+
 (use-package org
   :defer t
-  :custom 
-  (setq org-agenda-files (apply 'append
-				(mapcar
-				 (lambda (directory)
-				   (directory-files-recursively
-				    directory org-agenda-file-regexp))
-				 '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
-				 )))
   :config
   (leader-key-def "o a" 'org-agenda)
+  (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
+	org-priority-faces '((65 :foreground "#FF0000")
+			     (66 :foreground "#0098dd")
+			     (67 :foreground "#da8548")))
+
+
+  (setq org-ellipsis "  ⬎ ")
+  (setq org-startup-folded 'show2levels)
+  (setq org-hide-emphasis-markers t)
+  (setq org-list-demote-modify-bullet
+	'(("+" . "*") ("*" . "-") ("-" . "+")))
+
 
   (use-package org-download
     :straight t
     :init
     (add-hook 'dired-mode-hook 'org-download-enable))
-
 
   (use-package toc-org
     :straight t
@@ -398,6 +453,13 @@
   (use-package org-bullets
     :straight t)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+  (use-package org-fancy-priorities
+    :straight t
+    :hook (org-mode . org-fancy-priorities-mode)
+    :config
+    (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
+    org-todo-keywords '((sequence "HW")))
 
   :hook
   (org-mode . org-indent-mode)
