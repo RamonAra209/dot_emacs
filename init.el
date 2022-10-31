@@ -286,18 +286,16 @@
   :config
   (setq doom-themes-enable-bold t    
         doom-themes-enable-italic t) 
-
   (doom-themes-visual-bell-config)
   (doom-themes-neotree-config)
   (setq doom-themes-treemacs-theme "doom-atom") 
   (doom-themes-treemacs-config)
-  (doom-themes-org-config)
-;;  (custom-set-faces
-;;  `(line-number ((t (:background '#708090))))
-;;  `(line-number-current-line((t (:foreground '#ef7c2b)))))
-  )
-(load-theme 'ef-dark t)
-;; (load-theme 'doom-old-hope t)
+  (doom-themes-org-config))
+
+(load-theme 'doom-old-hope t)
+(set-face-foreground 'line-number "#708090")
+(set-face-foreground 'line-number-current-line "#ef7c2b")
+
 
 ;; Modeline
 (use-package doom-modeline
