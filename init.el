@@ -23,6 +23,7 @@
 
 
 ;; Mac-Specific Settings
+(setq frame-resize-pixelwise t)
 (when (eq system-type 'darwin) 
   (setq mac-option-modifier 'alt)
   (setq mac-command-modifier 'meta)
