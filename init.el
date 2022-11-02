@@ -68,7 +68,6 @@
 
 ;; Visual
 (setq display-line-numbers-type 'visual)
-;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
                 org-mode-hook))
@@ -90,9 +89,9 @@
   :straight t
   :config
   (dashboard-setup-startup-hook)
-  (add-to-list 'dashboard-items '(agenda) t)
   (setq dashboard-center-content t)
-  (setq dashboard-banner-logo-title "Go change the world, one line at a time")
+  (setq dashboard-banner-logo-title "Don't be a weenie")
+  (setq dashboard-items '((agenda . 15)))
   )
 
 ;;; Key Bindings 
@@ -260,13 +259,7 @@
 (use-package rustic ;; remember to: 'brew install rust-analyzer'
   :straight t
   :config
-  (setq rustic-cargo-bin "~/.cargo/bin/cargo")
-  )
-
-;; (use-package lsp-ui
-;;   :straight t
-;;   :config
-;;   (setq lsp-ui-sideline-enable t))
+  (setq rustic-cargo-bin "~/.cargo/bin/cargo"))
 
 (use-package yasnippet
   :straight t
@@ -378,8 +371,6 @@
 (leader-key-def "X" 'org-capture)
 (setq org-capture-templates
       '(
-        ;; ("t" "General Todo" entry (file+headline "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org/gtd.org" "Tasks")
-        ;;  "* TODO %?\n  %i\n  %a")
         ("t" "General Todo")
             ("te" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
              "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
