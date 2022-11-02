@@ -80,6 +80,17 @@
   :straight t
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package hl-todo
+  :straight t
+  :config
+  (setq hl-todo-keyword-faces
+	'(("TODO"   . "#FF69B4") 
+	  ("FIXME"  . "#FF0000") 
+	  ("NOTE"  . "#93C572") 
+	  ("REVIEW" . "#A7C7E7")
+	  ))
+  :init (global-hl-todo-mode))
+
 (use-package beacon
   :straight t
   :init
