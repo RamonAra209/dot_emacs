@@ -74,10 +74,12 @@
 
 ;; Visual
 (setq display-line-numbers-type 'visual)
-(dolist (mode '(text-mode-hook
-                prog-mode-hook
-                org-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 1))))
+;; (dolist (mode '(text-mode-hook
+;;                 prog-mode-hook
+;;                 org-mode-hook))
+;;   (add-hook mode (lambda () (display-line-numbers-mode 1))))
+
+(global-display-line-numbers-mode)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
