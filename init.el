@@ -182,7 +182,6 @@
   ))
 
 (use-package consult)
-(leader-key-def "h t" 'consult-theme)
 
 (use-package marginalia
   :bind (("M-A" . marginalia-cycle)
@@ -202,9 +201,6 @@
   (savehist-mode))
 
 (use-package helpful)
-(leader-key-def "h f" 'helpful-callable)
-(leader-key-def "h v" 'helpful-variable)
-(leader-key-def "h k" 'helpful-key)
 
 (use-package which-key
   :config
@@ -214,18 +210,12 @@
 
 ;; Dired + Buffer
 ;; (add-hook 'dired-mode-hook (lambda () (local-unset-key (kbd "SPC"))))
-(leader-key-def "f f" 'find-file)
-(leader-key-def "." 'find-file)
-(leader-key-def "," 'switch-to-buffer)
-(leader-key-def "b k" 'image-kill-buffer)
-(leader-key-def "RET" 'consult-bookmark)
 (use-package all-the-icons :straight t)
 
 ;; Git
 (use-package magit
   :ensure t
   :general
-  (leader-key-def "g g" 'magit-status)
   (setq magit-status-buffer-switch-function 'switch-to-buffer))
 
 ;; (use-package diff-hl
@@ -326,8 +316,6 @@
 
 
 ;; Window Management
-(leader-key-def "w c" 'evil-window-delete)
-(leader-key-def "w v" 'evil-window-vsplit)
 (setq winum-keymap
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "C-`") 'winum-select-window-by-number)
@@ -390,7 +378,6 @@
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
 
-(leader-key-def "X" 'org-capture)
 (setq org-capture-templates
       '(
         ("t" "General Todo")
@@ -433,7 +420,6 @@
 (use-package org
   :defer t
   :config
-  (leader-key-def "o a" 'org-agenda)
   (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
 	org-priority-faces '((65 :foreground "#FF0000")
 			     (66 :foreground "#0098dd")
@@ -496,20 +482,66 @@
 
 
 ;; Key Maps
-(leader-key-def
- :keymaps 'rustic-mode-map
- (leader-key-def "m b r" 'rustic-cargo-run)
- (leader-key-def "m b b" 'rustic-cargo-build)
- (leader-key-def "m b c" 'rustic-cargo-check)
- (leader-key-def "m b C" 'rustic-cargo-clippy))
-
-(leader-key-def
- :keymaps 'python-mode-map
- (leader-key-def "m v c" 'pyvenv-create)
- (leader-key-def "m v a" 'pyvenv-activate)
- (leader-key-def "m v d" 'pyvenv-deactivate)
- (leader-key-def "m v m" 'pyvenv-menu))
-
-(general-imap
+(general-imap ;; insert mode map
   :keymaps 'vterm-mode-map
   "C-c" 'vterm-send-C-c)
+
+(general-unbind 'normal dired-mode-map
+  :with 'ignore
+  [dired-next-line])
+
+(general-define-key
+ :states 'normal
+ "RET" 'push-button)
+
+(leader-key-def "." 'find-file)
+(leader-key-def "," 'switch-to-buffer)
+(leader-key-def "RET" '(consult-bookmark :which-key "bookmarks"))
+
+(leader-key-def "h" '(:ignore t :which-key "Help"))
+(leader-key-def "h f" 'helpful-callable)
+(leader-key-def "h v" 'helpful-variable)
+(leader-key-def "h k" 'helpful-key)
+(leader-key-def "h t" 'consult-theme)
+
+(leader-key-def "o" '(:ignore t :which-key "Org"))
+(leader-key-def "o a" 'org-agenda)
+(leader-key-def "o c" 'org-capture)
+(leader-key-def :states 'normal :keymaps 'override "o e" '(org-export-dispatch :which-key "org-export"))
+
+
+(leader-key-def "o i" '(:ignore t :which-key "Insert"))
+(leader-key-def "o i l" 'org-insert-link)
+
+(leader-key-def "t" '(:ignore t :which-key "Toggle"))
+(leader-key-def "t t" 'vterm-toggle)
+
+(leader-key-def "f" '(:ignore t :which-key "Find"))
+(leader-key-def "f f" 'find-file)
+
+(leader-key-def "g" '(:ignore t :which-key "Git"))
+(leader-key-def "g g" 'magit-status)
+
+(leader-key-def "w" '(:ignore t :which-key "Window"))
+(leader-key-def "w c" 'evil-window-delete)
+(leader-key-def "w v" 'evil-window-vsplit)
+
+(leader-key-def "b" '(:ignore t :which-key "Buffer"))
+(leader-key-def "b k" 'image-kill-buffer)
+
+
+;; Keybindings - Programming Modes
+(leader-key-def "m" '(:ignore t :which-key "Prog Mode"))
+
+(leader-key-def "m p" '(:ignore t :which-key "Python"))
+(leader-key-def "m p c" 'pyvenv-create)
+(leader-key-def "m p a" 'pyvenv-activate)
+(leader-key-def "m p k" 'pyvenv-deactivate)
+(leader-key-def "m p m" 'pyvenv-menu)
+(leader-key-def "m p d" 'numpydoc-generate)
+
+(leader-key-def "m r" '(:ignore t :which-key "Rust"))
+(leader-key-def "m r r" 'rustic-cargo-run)
+(leader-key-def "m r b" 'rustic-cargo-build)
+(leader-key-def "m r c" 'rustic-cargo-check)
+(leader-key-def "m r C" 'rustic-cargo-clippy)
