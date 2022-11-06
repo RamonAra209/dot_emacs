@@ -16,6 +16,12 @@
 (straight-use-package 'use-package)
 
 
+(use-package exec-path-from-shell
+  :straight t
+  :init
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
 ;; Custom File
 (setq custom-file "~/emacs.d/custom.el")
 (if (file-exists-p custom-file)
