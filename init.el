@@ -110,8 +110,8 @@
   (dashboard-setup-startup-hook)
   (setq dashboard-center-content t)
   (setq dashboard-banner-logo-title "Don't be a weenie")
-  (setq dashboard-items '((agenda . 15)))
-  )
+  (setq dashboard-items '((agenda . 15))))
+
 
 ;;; Key Bindings 
 (global-set-key (kbd "M-/") 'comment-line)
@@ -332,13 +332,16 @@
       map))
 (use-package winum :straight t :init (winum-mode))
 
+
 ;; Projectile
 (use-package projectile
   :straight t
   :custom
   (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
-  (leader-key-def "SPC" 'projectile-find-file))
+  (leader-key-def "SPC" 'projectile-find-file)
+  (setq projectile-ignored-projects '("~/")) ;; TODO Figure this out
+  )
 
 
 ;; Terminal
@@ -361,9 +364,10 @@
 		 ;;(direction . bottom)
 		 ;;(dedicated . t) ;dedicated is supported in emacs27
 		 (reusable-frames . visible)
-		 (window-height . 0.3)))
+		 (window-height . 0.3))))
 
-)
+
+;; PDF TODO / FIXME
 
 
 ;; Org Mode
