@@ -276,6 +276,7 @@
                           (lsp))))  ; or lsp-deferred
 
 (use-package pyvenv)
+(use-package numpydoc :straight t)
 
 (use-package rustic ;; remember to: 'brew install rust-analyzer'
   :straight t
