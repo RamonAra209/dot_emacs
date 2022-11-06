@@ -217,6 +217,7 @@
   :ensure t
   :general
   (setq magit-status-buffer-switch-function 'switch-to-buffer))
+(add-hook 'git-commit-mode-hook 'evil-insert-state)
 
 ;; (use-package diff-hl
 ;;   :config
