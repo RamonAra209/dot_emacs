@@ -55,7 +55,9 @@
   (general-unbind 'normal dired-mode-map "SPC")
 
   (general-create-definer leader-key-def
-    :keymaps '(normal insert visual emacs)
+    ;; :keymaps '(normal insert visual emacs)
+    :states '(normal insert visual emacs)
+    :keymaps 'override
     :prefix "SPC"
     :global-prefix "C-SPC"))
 
