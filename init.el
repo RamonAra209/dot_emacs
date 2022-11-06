@@ -486,37 +486,58 @@
  :states 'normal
  "RET" 'push-button)
 
-(leader-key-def "." 'find-file)
-(leader-key-def "," 'switch-to-buffer)
-(leader-key-def "RET" '(consult-bookmark :which-key "bookmarks"))
+(leader-key-def ;; REVIEW Link to gist to show leader-key-cleanup: https://gist.github.com/thriveth/1cfb03fac55c3076a34f9627bc3c6a63
+  "." 'find-file
+  "," 'switch-to-buffer
 
-(leader-key-def "h" '(:ignore t :which-key "Help"))
-(leader-key-def "h f" 'helpful-callable)
-(leader-key-def "h v" 'helpful-variable)
-(leader-key-def "h k" 'helpful-key)
-(leader-key-def "h t" 'consult-theme)
+  "RET" '(consult-bookmark :which-key "bookmarks")
 
-(leader-key-def "o" '(:ignore t :which-key "Org"))
-(leader-key-def "o a" 'org-agenda)
-(leader-key-def "o c" 'org-capture)
-(leader-key-def :states 'normal :keymaps 'override "o e" '(org-export-dispatch :which-key "org-export"))
+  "h" '(:ignore t :which-key "Help")
+  "h f" 'helpful-callable
+  "h v" 'helpful-variable
+  "h k" 'helpful-key
+  "h t" 'consult-theme
 
+  "o" '(:ignore t :which-key "Org")
+  "o a" 'org-agenda
+  "o c" 'org-capture
+  ;; :states 'normal :keymaps 'override "o e" '(org-export-dispatch :which-key "org-export"))
 
-(leader-key-def "o i" '(:ignore t :which-key "Insert"))
-(leader-key-def "o i l" 'org-insert-link)
+  "o i" '(:ignore t :which-key "Insert")
+  "o i l" 'org-insert-link
 
-(leader-key-def "t" '(:ignore t :which-key "Toggle"))
-(leader-key-def "t t" 'vterm-toggle)
+  "t" '(:ignore t :which-key "Toggle")
+  "t t" 'vterm-toggle
 
-(leader-key-def "f" '(:ignore t :which-key "Find"))
-(leader-key-def "f f" 'find-file)
+  "f" '(:ignore t :which-key "Find")
+  "f f" 'find-file
 
-(leader-key-def "g" '(:ignore t :which-key "Git"))
-(leader-key-def "g g" 'magit-status)
+  "g" '(:ignore t :which-key "Git")
+  "g g" 'magit-status
 
-(leader-key-def "w" '(:ignore t :which-key "Window"))
-(leader-key-def "w c" 'evil-window-delete)
-(leader-key-def "w v" 'evil-window-vsplit)
+  "w" '(:ignore t :which-key "Window")
+  "w c" 'evil-window-delete
+  "w v" 'evil-window-vsplit
+
+  "b" '(:ignore t :which-key "Buffer")
+  "b k" 'image-kill-buffer
+
+  "m" '(:ignore t :which-key "Prog Mode")
+
+  "m p" '(:ignore t :which-key "Python")
+  "m p c" 'pyvenv-create
+  "m p a" 'pyvenv-activate
+  "m p k" 'pyvenv-deactivate
+  "m p m" 'pyvenv-menu
+  "m p d" 'numpydoc-generate
+
+  "m r" '(:ignore t :which-key "Rust")
+  "m r r" 'rustic-cargo-run
+  "m r b" 'rustic-cargo-build
+  "m r c" 'rustic-cargo-check
+  "m r C" 'rustic-cargo-clippy
+)
+
 (setq winum-keymap
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "C-`") 'winum-select-window-by-number)
@@ -531,23 +552,3 @@
       (leader-key-def "w 7" 'winum-select-window-7)
       (leader-key-def "w 8" 'winum-select-window-8)
       map))
-
-(leader-key-def "b" '(:ignore t :which-key "Buffer"))
-(leader-key-def "b k" 'image-kill-buffer)
-
-
-;; Keybindings - Programming Modes
-(leader-key-def "m" '(:ignore t :which-key "Prog Mode"))
-
-(leader-key-def "m p" '(:ignore t :which-key "Python"))
-(leader-key-def "m p c" 'pyvenv-create)
-(leader-key-def "m p a" 'pyvenv-activate)
-(leader-key-def "m p k" 'pyvenv-deactivate)
-(leader-key-def "m p m" 'pyvenv-menu)
-(leader-key-def "m p d" 'numpydoc-generate)
-
-(leader-key-def "m r" '(:ignore t :which-key "Rust"))
-(leader-key-def "m r r" 'rustic-cargo-run)
-(leader-key-def "m r b" 'rustic-cargo-build)
-(leader-key-def "m r c" 'rustic-cargo-check)
-(leader-key-def "m r C" 'rustic-cargo-clippy)
