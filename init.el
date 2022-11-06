@@ -206,7 +206,9 @@
 (leader-key-def "h v" 'helpful-variable)
 (leader-key-def "h k" 'helpful-key)
 
-(use-package which-key)
+(use-package which-key
+  :config
+  (setq which-key-idle-delay 1))
 (which-key-mode)
 
 
