@@ -348,10 +348,6 @@
 		       (or (equal major-mode 'vterm-mode)
 			   (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
 		 (display-buffer-reuse-window display-buffer-at-bottom)
-		 ;;(display-buffer-reuse-window display-buffer-in-direction)
-		 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-		 ;;(direction . bottom)
-		 ;;(dedicated . t) ;dedicated is supported in emacs27
 		 (reusable-frames . visible)
 		 (window-height . 0.3))))
 
@@ -486,7 +482,7 @@
  :states 'normal
  "RET" 'push-button)
 
-(leader-key-def ;; REVIEW Link to gist to show leader-key-cleanup: https://gist.github.com/thriveth/1cfb03fac55c3076a34f9627bc3c6a63
+(leader-key-def ;; NOTE/REVIEW Link to gist to show leader-key-cleanup: https://gist.github.com/thriveth/1cfb03fac55c3076a34f9627bc3c6a63
   "." 'find-file
   "," 'switch-to-buffer
 
@@ -538,7 +534,9 @@
   "m r C" 'rustic-cargo-clippy
 )
 
-(setq winum-keymap
+
+;; FIXME: Figure out how to embed this into the keymapping
+(setq winum-keymap 
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "C-`") 'winum-select-window-by-number)
       (define-key map (kbd "C-²") 'winum-select-window-by-number)
