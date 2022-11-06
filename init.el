@@ -363,7 +363,6 @@
 		 (reusable-frames . visible)
 		 (window-height . 0.3)))
 
-  (leader-key-def "o t" 'vterm-toggle)
 )
 
 
