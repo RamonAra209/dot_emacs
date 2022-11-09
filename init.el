@@ -494,6 +494,7 @@
   "h v" 'helpful-variable
   "h k" 'helpful-key
   "h t" 'consult-theme
+  "h m" 'describe-mode
 
   "o" '(:ignore t :which-key "Org")
   "o a" 'org-agenda
@@ -502,6 +503,7 @@
 
   "o i" '(:ignore t :which-key "Insert")
   "o i l" 'org-insert-link
+  "o i t" 'org-table-create
 
   "t" '(:ignore t :which-key "Toggle")
   "t t" 'vterm-toggle
@@ -518,6 +520,15 @@
 
   "b" '(:ignore t :which-key "Buffer")
   "b k" 'image-kill-buffer
+
+  "l" '(:ignore t :which-key "LSP")
+  "l a" '(lsp :which-key "activate")
+  "l r" 'lsp-workspace-restart
+
+  "l w" '(:ignore w :which-key "Workspaces")
+  "l w a" '(lsp-workspace-folders-add :which-key "add project to lsp")
+  "l w r" '(lsp-workspace-folders-remove :which-key "remove project from lsp")
+  "l w b" '(lsp-workspace-blacklist-remove :which-key "remove project from blacklist")
 
   "m" '(:ignore t :which-key "Prog Mode")
 
