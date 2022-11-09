@@ -408,6 +408,7 @@
 (use-package org
   :defer t
   :config
+  (setq org-image-actual-width 400)
   (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
 	org-priority-faces '((65 :foreground "#FF0000")
 			     (66 :foreground "#0098dd")
