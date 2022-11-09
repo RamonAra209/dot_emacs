@@ -15,7 +15,6 @@
   (load bootstrap-file nil 'nomessage))
 (straight-use-package 'use-package)
 
-
 (use-package exec-path-from-shell
   :straight t
   :init
@@ -44,6 +43,7 @@
 (global-set-key (kbd "M-q") 'save-buffers-kill-emacs)
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
+
 
 ;; General 
 (use-package general
@@ -120,8 +120,6 @@
 (electric-pair-mode)
 
 (use-package undo-fu)
-
-(use-package undo-fu-session :straight t :init (global-undo-fu-session-mode))
 
 (use-package evil
   :demand t
@@ -211,7 +209,8 @@
 
 
 ;; Dired + Buffer
-;; (add-hook 'dired-mode-hook (lambda () (local-unset-key (kbd "SPC"))))
+(add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
+
 (use-package all-the-icons :straight t)
 
 ;; Git
@@ -254,21 +253,21 @@
 (use-package lsp-mode
   :straight t
   :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (python-mode . lsp)
-         ;; if you want which-key integration
+         (rust-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
 (use-package lsp-pyright ;; remember to: 'brew install pyright'
-  :ensure t
+  :straight t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
 
-(use-package pyvenv)
+(use-package pyvenv) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
+
 (use-package numpydoc :straight t)
 
 (use-package rustic ;; remember to: 'brew install rust-analyzer'
@@ -456,18 +455,122 @@
     (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
     org-todo-keywords '((sequence "HW")))
 
+  ;; (use-package ox-pandoc
+  ;;   :straight t)
+
+  (use-package evil-org-mode
+    :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
+    :hook ((org-mode . evil-org-mode)
+	   (org-mode . (lambda () 
+			 (require 'evil-org)
+			 (evil-normalize-keymaps)
+			 (evil-org-set-key-theme '(textobjects))
+			 (require 'evil-org-agenda)
+			 (evil-org-agenda-set-keys))))
+    :bind
+    ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
+    ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
+    :general
+    (general-nmap
+      :keymaps 'org-mode-map
+      :states 'normal
+      "RET"   #'org-open-at-point
+      ;; "RET"   #'+org/dwim-at-point
+      )
+    :init
+    (defun +org--insert-item (direction)
+      (let ((context (org-element-lineage
+		      (org-element-context)
+		      '(table table-row headline inlinetask item plain-list)
+		      t)))
+	(pcase (org-element-type context)
+	  ;; Add a new list item (carrying over checkboxes if necessary)
+	  ((or `item `plain-list)
+	   ;; Position determines where org-insert-todo-heading and org-insert-item
+	   ;; insert the new list item.
+	   (if (eq direction 'above)
+	       (org-beginning-of-item)
+	     (org-end-of-item)
+	     (backward-char))
+	   (org-insert-item (org-element-property :checkbox context))
+	   ;; Handle edge case where current item is empty and bottom of list is
+	   ;; flush against a new heading.
+	   (when (and (eq direction 'below)
+		      (eq (org-element-property :contents-begin context)
+			  (org-element-property :contents-end context)))
+	     (org-end-of-item)
+	     (org-end-of-line)))
+
+	  ;; Add a new table row
+	  ((or `table `table-row)
+	   (pcase direction
+	     ('below (save-excursion (org-table-insert-row t))
+		     (org-table-next-row))
+	     ('above (save-excursion (org-shiftmetadown))
+		     (+org/table-previous-row))))
+
+	  ;; Otherwise, add a new heading, carrying over any todo state, if
+	  ;; necessary.
+	  (_
+	   (let ((level (or (org-current-level) 1)))
+	     ;; I intentionally avoid `org-insert-heading' and the like because they
+	     ;; impose unpredictable whitespace rules depending on the cursor
+	     ;; position. It's simpler to express this command's responsibility at a
+	     ;; lower level than work around all the quirks in org's API.
+	     (pcase direction
+	       (`below
+		(let (org-insert-heading-respect-content)
+		  (goto-char (line-end-position))
+		  (org-end-of-subtree)
+		  (insert "\n" (make-string level ?*) " ")))
+	       (`above
+		(org-back-to-heading)
+		(insert (make-string level ?*) " ")
+		(save-excursion (insert "\n"))))
+	     (when-let* ((todo-keyword (org-element-property :todo-keyword context))
+			 (todo-type    (org-element-property :todo-type context)))
+	       (org-todo
+		(cond ((eq todo-type 'done)
+		       ;; Doesn't make sense to create more "DONE" headings
+		       (car (+org-get-todo-keywords-for todo-keyword)))
+		      (todo-keyword)
+		      ('todo)))))))
+
+	(when (org-invisible-p)
+	  (org-show-hidden-entry))
+	(when (and (bound-and-true-p evil-local-mode)
+		   (not (evil-emacs-state-p)))
+	  (evil-insert 1))))
+
+    (defun +org/insert-item-below (count)
+      "Inserts a new heading, table cell or item below the current one."
+      (interactive "p")
+      (dotimes (_ count) (+org--insert-item 'below)))
+
+    (defun +org/insert-item-above (count)
+      "Inserts a new heading, table cell or item above the current one."
+      (interactive "p")
+      (dotimes (_ count) (+org--insert-item 'above)))
+
+    )
+
   :hook
-  (org-mode . org-indent-mode)
-  )
+  (org-mode . org-indent-mode))
 
 
 ;; Misc
 (eldoc-mode -1)
+(save-place-mode 1)
+(setq use-dialog-box nil)
+(global-auto-revert-mode 1)
 
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (add-hook 'text-mode-hook 'hl-line-mode)
 
 (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) 
+(setq scroll-conservatively 101)
+
+;; (add-to-list 'exec-path "/Library/TeX/texbin/pdflatex")
 
 
 ;; Key Maps
