@@ -237,18 +237,14 @@
 
 
 ;; Completion
-;; (setq python-shell-exec-path "/opt/homebrew/bin/python3.11")
-
-(use-package corfu
+(use-package company ;; TODO add tab completion
+  :straight t
   :custom
-  (corfu-auto t)
-  (corfu-auto-prefix 3)
-  (corfu-auto-delay 0.0)           ; Enable auto completion
-  (corfu-quit-at-boundary 'separator)
-  (corfu-echo-documentation 0.25)   ; Enable auto completion
-  (corfu-preview-current 'insert)   ; Do not preview current candidate
+  (company-minimum-prefix-length 3)
   :init
-  (global-corfu-mode))
+  (setq company-idle-delay 0.01)
+  (global-company-mode)
+  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
 
 (use-package lsp-mode
   :straight t
