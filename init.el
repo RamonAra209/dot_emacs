@@ -246,21 +246,7 @@
   (global-company-mode)
   (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
 
-(use-package lsp-mode
-  :straight t
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (python-mode . lsp)
-         (rust-mode . lsp)
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
-
-(use-package lsp-pyright ;; remember to: 'brew install pyright'
-  :straight t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+(use-package eglot)
 
 (use-package pyvenv) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
 
@@ -621,13 +607,8 @@
   "b k" 'image-kill-buffer
 
   "l" '(:ignore t :which-key "LSP")
-  "l a" '(lsp :which-key "activate")
-  "l r" 'lsp-workspace-restart
-
-  "l w" '(:ignore w :which-key "Workspaces")
-  "l w a" '(lsp-workspace-folders-add :which-key "add project to lsp")
-  "l w r" '(lsp-workspace-folders-remove :which-key "remove project from lsp")
-  "l w b" '(lsp-workspace-blacklist-remove :which-key "remove project from blacklist")
+  "l a" '(eglot :which-key "activate lsp")
+  "l r" '(eglot-rename :which-key "rename variable")
 
   "m" '(:ignore t :which-key "Prog Mode")
 
