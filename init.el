@@ -582,56 +582,66 @@
 
   "RET" '(consult-bookmark :which-key "bookmarks")
 
-  "h" '(:ignore t :which-key "Help")
-  "h f" 'helpful-callable
-  "h v" 'helpful-variable
-  "h k" 'helpful-key
-  "h t" 'consult-theme
-  "h m" 'describe-mode
-
-  "o" '(:ignore t :which-key "Org")
-  "o a" 'org-agenda
-  "o c" 'org-capture
-  ;; :states 'normal :keymaps 'override "o e" '(org-export-dispatch :which-key "org-export"))
-
-  "o i" '(:ignore t :which-key "Insert")
-  "o i l" 'org-insert-link
-  "o i t" 'org-table-create
-
-  "t" '(:ignore t :which-key "Toggle")
-  "t t" 'vterm-toggle
+  "b" '(:ignore t :which-key "Buffer")
+  "b k" 'image-kill-buffer
+  "b r" '(revert-buffer :which-key "refresh-buffer")
 
   "f" '(:ignore t :which-key "Find")
   "f f" 'find-file
 
   "g" '(:ignore t :which-key "Git")
   "g g" 'magit-status
+  "g i" '(ramon/template-insert-gitignore :which-key "insert-gitignore-template")
 
-  "w" '(:ignore t :which-key "Window")
-  "w c" 'evil-window-delete
-  "w v" 'evil-window-vsplit
-
-  "b" '(:ignore t :which-key "Buffer")
-  "b k" 'image-kill-buffer
+  "h" '(:ignore t :which-key "Help")
+  "h f" 'helpful-callable
+  "h v" 'helpful-variable
+  "h k" 'helpful-key
+  "h t" 'consult-theme
+  "h m" 'describe-mode
+  "h r r" 'eval-defun
 
   "l" '(:ignore t :which-key "LSP")
   "l a" '(eglot :which-key "activate lsp")
   "l r" '(eglot-rename :which-key "rename variable")
 
   "m" '(:ignore t :which-key "Prog Mode")
-
   "m p" '(:ignore t :which-key "Python")
   "m p c" 'pyvenv-create
   "m p a" 'pyvenv-activate
   "m p k" 'pyvenv-deactivate
   "m p m" 'pyvenv-menu
   "m p d" 'numpydoc-generate
-
   "m r" '(:ignore t :which-key "Rust")
   "m r r" 'rustic-cargo-run
   "m r b" 'rustic-cargo-build
   "m r c" 'rustic-cargo-check
   "m r C" 'rustic-cargo-clippy
+
+  "o" '(:ignore t :which-key "Org")
+  "o a" 'org-agenda
+  "o c" 'org-capture
+  "o w" '(flyspell-correct-wrapper :which-key "correct-word")
+
+  "o i" '(:ignore t :which-key "Insert")
+  "o i l" 'org-insert-link
+  "o i t" 'org-table-create
+  "o i s" 'org-insert-structure-template
+
+  "o t" '(:ignore t :which-key "Toggle")
+  "o t c" 'org-toggle-checkbox
+
+  "p" '(:ignore t :which-key "Projectile")
+  "p p" 'projectile-find-file
+
+  "t" '(:ignore t :which-key "Toggle")
+  "t t" 'vterm-toggle
+
+  "w" '(:ignore t :which-key "Window")
+  "w c" 'evil-window-delete
+  "w v" 'evil-window-vsplit
+  "w u" 'winner-undo
+  "w n" 'evil-window-new
 )
 
 
