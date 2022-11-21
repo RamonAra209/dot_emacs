@@ -404,59 +404,6 @@
   (setq org-hide-emphasis-markers t)
   (setq org-list-demote-modify-bullet
 	'(("+" . "*") ("*" . "-") ("-" . "+")))
-
-  (use-package evil-org
-    :ensure t
-    :after org
-    :hook (org-mode . (lambda () evil-org-mode))
-    :config
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys))
-
-  (use-package org-download
-    :straight t
-    :init
-    (add-hook 'dired-mode-hook 'org-download-enable))
-
-  (use-package toc-org
-    :straight t
-    :config
-    (if (require 'toc-org nil t)
-	(progn
-	  (add-hook 'org-mode-hook 'toc-org-mode)
-	  (add-hook 'markdown-mode-hook 'toc-org-mode)
-	  (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
-      (warn "toc-org not found")))
-
-  (use-package org-bullets
-    :straight t)
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-
-  (use-package org-fancy-priorities
-    :straight t
-    :hook (org-mode . org-fancy-priorities-mode)
-    :config
-    (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
-    org-todo-keywords '((sequence "HW")))
-
-  (use-package evil-org-mode
-    :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
-    :hook ((org-mode . evil-org-mode)
-	   (org-mode . (lambda () 
-			 (require 'evil-org)
-			 (evil-normalize-keymaps)
-			 (evil-org-set-key-theme '(textobjects))
-			 (require 'evil-org-agenda)
-			 (evil-org-agenda-set-keys))))
-    :bind
-    ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
-    ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
-    :general
-    (general-nmap
-      :keymaps 'org-mode-map
-      :states 'normal
-      "RET"   #'org-open-at-point))
-
   :hook
   (org-mode . org-indent-mode)
   (org-mode . toggle-truncate-lines)
@@ -468,6 +415,57 @@
 
 (use-package ox-reveal)
 
+(use-package evil-org
+  :ensure t
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+(use-package org-download
+  :straight t
+  :init
+  (add-hook 'dired-mode-hook 'org-download-enable))
+
+(use-package toc-org
+  :straight t
+  :config
+  (if (require 'toc-org nil t)
+      (progn
+	(add-hook 'org-mode-hook 'toc-org-mode)
+	(add-hook 'markdown-mode-hook 'toc-org-mode)
+	(define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+    (warn "toc-org not found")))
+
+(use-package org-bullets
+  :straight t)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+(use-package org-fancy-priorities
+  :straight t
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
+  org-todo-keywords '((sequence "HW")))
+
+(use-package evil-org-mode
+  :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
+  :hook ((org-mode . evil-org-mode)
+	 (org-mode . (lambda () 
+		       (require 'evil-org)
+		       (evil-normalize-keymaps)
+		       (evil-org-set-key-theme '(textobjects))
+		       (require 'evil-org-agenda)
+		       (evil-org-agenda-set-keys))))
+  :bind
+  ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
+  ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
+  :general
+  (general-nmap
+    :keymaps 'org-mode-map
+    :states 'normal
+    "RET"   #'org-open-at-point))
 
 ;; Key Maps
 (general-imap 
