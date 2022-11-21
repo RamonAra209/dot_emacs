@@ -308,6 +308,7 @@
 
 ;; Window Management
 (use-package winum :straight t :init (winum-mode))
+(winner-mode 1)
 
 
 ;; Projectile
