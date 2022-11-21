@@ -660,3 +660,20 @@
       (leader-key-def "w 7" 'winum-select-window-7)
       (leader-key-def "w 8" 'winum-select-window-8)
       map))
+
+
+;; Misc
+(eldoc-mode -1)
+(save-place-mode 1)
+(global-auto-revert-mode 1)
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(add-hook 'prog-mode-hook 'hl-line-mode)
+(add-hook 'text-mode-hook 'hl-line-mode)
+
+(setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) 
+(setq scroll-conservatively 101)
+(setq use-dialog-box nil)
+(setq make-backup-files nil)
+
+
