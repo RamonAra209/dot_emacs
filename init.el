@@ -76,11 +76,6 @@
 
 ;; Visual
 (setq display-line-numbers-type 'visual)
-;; (dolist (mode '(text-mode-hook
-;;                 prog-mode-hook
-;;                 org-mode-hook))
-;;   (add-hook mode (lambda () (display-line-numbers-mode 1))))
-
 (global-display-line-numbers-mode)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
@@ -156,16 +151,6 @@
 (use-package evil-multiedit)
 (evil-multiedit-default-keybinds)
 
-(use-package evil-goggles
-  :straight t
-  :custom
-  (setq evil-goggles-duration 0.150)
-  (setq evil-goggles-enable-change t)
-  (setq evil-goggles-enable-delete t)
-  :config
-  (evil-goggles-mode)
-  (evil-goggles-use-diff-faces))
-
 (use-package evil-snipe
   :straight t
   :init
@@ -177,9 +162,7 @@
   :config
   (vertico-mode)
   :bind (:map vertico-map
-	      ("DEL" . #'vertico-directory-delete-char)
-	      ;; ("DEL" . #'vertico-directory-delete-word)
-  ))
+	      ("DEL" . #'vertico-directory-delete-char)))
 
 (use-package consult)
 
@@ -210,7 +193,6 @@
 
 ;; Dired + Buffer
 (add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
-
 (use-package all-the-icons :straight t)
 
 ;; Git
@@ -219,10 +201,6 @@
   :general
   (setq magit-status-buffer-switch-function 'switch-to-buffer))
 (add-hook 'git-commit-mode-hook 'evil-insert-state)
-
-;; (use-package diff-hl
-;;   :config
-;;   (global-diff-hl-mode))
 
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
@@ -254,6 +232,9 @@
   (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
 
 (use-package eglot)
+
+(use-package haskell-mode
+  :straight t)
 
 (use-package pyvenv) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
 
@@ -317,16 +298,26 @@
 (use-package winum :straight t :init (winum-mode))
 (winner-mode 1)
 
-
-;; Projectile
+;; Project management
 (use-package projectile
   :straight t
   :custom
   (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
-  (leader-key-def "SPC" 'projectile-find-file)
-  (setq projectile-ignored-projects '("~/")) ;; TODO Figure this out
-  )
+  (setq projectile-ignored-projects '("~/"))) ;; TODO Figure this out
+
+;; (defcustom project-root-markers ;; yoinked from: https://andreyorst.gitlab.io/posts/2022-07-16-project-el-enhancements/
+;;   '("Cargo.toml" ".git" "main.py" ".root")
+;;   "Files or directories that indicate the root of a project."
+;;   :type '(repeat string)
+;;   :group 'project)
+
+;; (defun project-root-p (path)
+;;   "Check if the current PATH has any of the project root markers."
+;;   (catch 'found
+;;     (dolist (marker project-root-markers)
+;;       (when (file-exists-p (concat path marker))
+;; 	(throw 'found marker)))))
 
 
 ;; Terminal
@@ -397,9 +388,7 @@
 
             ("ww" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
              "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
-            )
-)
+             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))))
 
 (use-package org
   :defer t
@@ -435,8 +424,6 @@
     (if (require 'toc-org nil t)
 	(progn
 	  (add-hook 'org-mode-hook 'toc-org-mode)
-
-	  ;; enable in markdown, too
 	  (add-hook 'markdown-mode-hook 'toc-org-mode)
 	  (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
       (warn "toc-org not found")))
@@ -451,9 +438,6 @@
     :config
     (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
     org-todo-keywords '((sequence "HW")))
-
-  ;; (use-package ox-pandoc
-  ;;   :straight t)
 
   (use-package evil-org-mode
     :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
@@ -471,107 +455,22 @@
     (general-nmap
       :keymaps 'org-mode-map
       :states 'normal
-      "RET"   #'org-open-at-point
-      ;; "RET"   #'+org/dwim-at-point
-      )
-    :init
-    (defun +org--insert-item (direction)
-      (let ((context (org-element-lineage
-		      (org-element-context)
-		      '(table table-row headline inlinetask item plain-list)
-		      t)))
-	(pcase (org-element-type context)
-	  ;; Add a new list item (carrying over checkboxes if necessary)
-	  ((or `item `plain-list)
-	   ;; Position determines where org-insert-todo-heading and org-insert-item
-	   ;; insert the new list item.
-	   (if (eq direction 'above)
-	       (org-beginning-of-item)
-	     (org-end-of-item)
-	     (backward-char))
-	   (org-insert-item (org-element-property :checkbox context))
-	   ;; Handle edge case where current item is empty and bottom of list is
-	   ;; flush against a new heading.
-	   (when (and (eq direction 'below)
-		      (eq (org-element-property :contents-begin context)
-			  (org-element-property :contents-end context)))
-	     (org-end-of-item)
-	     (org-end-of-line)))
-
-	  ;; Add a new table row
-	  ((or `table `table-row)
-	   (pcase direction
-	     ('below (save-excursion (org-table-insert-row t))
-		     (org-table-next-row))
-	     ('above (save-excursion (org-shiftmetadown))
-		     (+org/table-previous-row))))
-
-	  ;; Otherwise, add a new heading, carrying over any todo state, if
-	  ;; necessary.
-	  (_
-	   (let ((level (or (org-current-level) 1)))
-	     ;; I intentionally avoid `org-insert-heading' and the like because they
-	     ;; impose unpredictable whitespace rules depending on the cursor
-	     ;; position. It's simpler to express this command's responsibility at a
-	     ;; lower level than work around all the quirks in org's API.
-	     (pcase direction
-	       (`below
-		(let (org-insert-heading-respect-content)
-		  (goto-char (line-end-position))
-		  (org-end-of-subtree)
-		  (insert "\n" (make-string level ?*) " ")))
-	       (`above
-		(org-back-to-heading)
-		(insert (make-string level ?*) " ")
-		(save-excursion (insert "\n"))))
-	     (when-let* ((todo-keyword (org-element-property :todo-keyword context))
-			 (todo-type    (org-element-property :todo-type context)))
-	       (org-todo
-		(cond ((eq todo-type 'done)
-		       ;; Doesn't make sense to create more "DONE" headings
-		       (car (+org-get-todo-keywords-for todo-keyword)))
-		      (todo-keyword)
-		      ('todo)))))))
-
-	(when (org-invisible-p)
-	  (org-show-hidden-entry))
-	(when (and (bound-and-true-p evil-local-mode)
-		   (not (evil-emacs-state-p)))
-	  (evil-insert 1))))
-
-    (defun +org/insert-item-below (count)
-      "Inserts a new heading, table cell or item below the current one."
-      (interactive "p")
-      (dotimes (_ count) (+org--insert-item 'below)))
-
-    (defun +org/insert-item-above (count)
-      "Inserts a new heading, table cell or item above the current one."
-      (interactive "p")
-      (dotimes (_ count) (+org--insert-item 'above)))
-
-    )
+      "RET"   #'org-open-at-point))
 
   :hook
-  (org-mode . org-indent-mode))
+  (org-mode . org-indent-mode)
+  (org-mode . toggle-truncate-lines)
+  (org-mode . flyspell-mode))
 
+(require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("py" . "src python :results output"))
 
-;; Misc
-(eldoc-mode -1)
-(save-place-mode 1)
-(setq use-dialog-box nil)
-(global-auto-revert-mode 1)
-
-(add-hook 'prog-mode-hook 'hl-line-mode)
-(add-hook 'text-mode-hook 'hl-line-mode)
-
-(setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) 
-(setq scroll-conservatively 101)
-
-;; (add-to-list 'exec-path "/Library/TeX/texbin/pdflatex")
+(use-package ox-reveal)
 
 
 ;; Key Maps
-(general-imap ;; insert mode map
+(general-imap 
   :keymaps 'vterm-mode-map
   "C-c" 'vterm-send-C-c)
 
