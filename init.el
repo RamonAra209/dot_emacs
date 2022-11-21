@@ -235,6 +235,13 @@
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
+(defun ramon/template-insert-gitignore()
+  (interactive)
+  (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
+         (files (directory-files dir nil ".*\\.gitignore"))
+         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
+    (insert-file-contents (concat dir (concat pick ".gitignore")))))
+
 
 ;; Completion
 (use-package company ;; TODO add tab completion
@@ -675,5 +682,3 @@
 (setq scroll-conservatively 101)
 (setq use-dialog-box nil)
 (setq make-backup-files nil)
-
-
