@@ -118,7 +118,7 @@
 (add-hook 'git-commit-mode-hook 'evil-insert-state)
 
 (use-package git-gutter
-  :hook (prog-mode . git-gutter-mode)
+  :hook (prog-mode . git-gutter-mode) (org-mode . git-gutter-mode)
   :config
   (setq git-gutter:update-interval 0.02))
 
@@ -212,13 +212,56 @@
   (setq which-key-idle-delay 1))
 (which-key-mode)
 
+(use-package org 
+  :defer t
+  :config
+  (setq org-image-actual-width 400)
+  (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
+        org-priority-faces '((65 :foreground "#FF0000")
+                             (66 :foreground "#0098dd")
+                             (67 :foreground "#da8548")))
+
+  ;; (setq org-ellipsis "  ⬎ ")
+  (setq org-startup-folded 'show2levels)
+  ;; (setq org-hide-emphasis-markers t)
+  :hook
+  (org-mode . org-indent-mode)
+  (org-mode . toggle-truncate-lines)
+  (org-mode . flyspell-mode))
+
+(use-package evil-org
+  :ensure t
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+(use-package evil-org-mode
+  :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
+  :hook ((org-mode . evil-org-mode)
+         (org-mode . (lambda () 
+                       (require 'evil-org)
+                       (evil-normalize-keymaps)
+                       (evil-org-set-key-theme '(textobjects))
+                       (require 'evil-org-agenda)
+                       (evil-org-agenda-set-keys))))
+  :bind
+  ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
+  ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
+  :general
+  (general-nmap
+    :keymaps 'org-mode-map
+    :states 'normal
+    "RET"   #'org-open-at-point))
+
 (setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
-			      (mapcar
-			       (lambda (directory)
-				 (directory-files-recursively
-				  directory org-agenda-file-regexp))
-			       '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
-			       )))
+                              (mapcar
+                               (lambda (directory)
+                                 (directory-files-recursively
+                                  directory org-agenda-file-regexp))
+                               '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
+                               )))
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
 
@@ -259,57 +302,62 @@
              "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
              :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))))
 
-(use-package org
-  :defer t
-  :config
-  (setq org-image-actual-width 400)
-  (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
-	org-priority-faces '((65 :foreground "#FF0000")
-			     (66 :foreground "#0098dd")
-			     (67 :foreground "#da8548")))
-
-  (setq org-ellipsis "  ⬎ ")
-  (setq org-startup-folded 'show2levels)
-  (setq org-hide-emphasis-markers t)
-  (setq org-list-demote-modify-bullet
-	'(("+" . "*") ("*" . "-") ("-" . "+")))
-  :hook
-  (org-mode . org-indent-mode)
-  (org-mode . toggle-truncate-lines)
-  (org-mode . flyspell-mode))
-
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python :results output"))
 
 (use-package ox-reveal)
 
-(use-package evil-org
-  :ensure t
-  :after org
-  :hook (org-mode . (lambda () evil-org-mode))
-  :config
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
-
 (use-package org-download
   :straight t
   :init
   (add-hook 'dired-mode-hook 'org-download-enable))
+
+(use-package org-auto-tangle
+  :defer t
+  :hook (org-mode . org-auto-tangle-mode))
 
 (use-package toc-org
   :straight t
   :config
   (if (require 'toc-org nil t)
       (progn
-	(add-hook 'org-mode-hook 'toc-org-mode)
-	(add-hook 'markdown-mode-hook 'toc-org-mode)
-	(define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+        (add-hook 'org-mode-hook 'toc-org-mode)
+        (add-hook 'markdown-mode-hook 'toc-org-mode)
+        (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
     (warn "toc-org not found")))
 
-(use-package org-bullets
-  :straight t)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+;; (use-package org-bullets
+;;   :straight t)
+;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+(use-package org-modern
+  :straight t
+  :config
+  (setq
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-list-demote-modify-bullet
+   '(("+" . "*") ("*" . "-") ("-" . "+"))
+
+   ;; Agenda styling
+   org-agenda-tags-column 0
+   org-agenda-block-separator ?─
+   org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+   org-agenda-current-time-string
+   "⭠ now ─────────────────────────────────────────────────")
+
+  (global-org-modern-mode))
 
 (use-package org-fancy-priorities
   :straight t
@@ -317,24 +365,6 @@
   :config
   (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
   org-todo-keywords '((sequence "HW")))
-
-(use-package evil-org-mode
-  :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
-  :hook ((org-mode . evil-org-mode)
-	 (org-mode . (lambda () 
-		       (require 'evil-org)
-		       (evil-normalize-keymaps)
-		       (evil-org-set-key-theme '(textobjects))
-		       (require 'evil-org-agenda)
-		       (evil-org-agenda-set-keys))))
-  :bind
-  ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
-  ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
-  :general
-  (general-nmap
-    :keymaps 'org-mode-map
-    :states 'normal
-    "RET"   #'org-open-at-point))
 
 (use-package projectile
   :straight t
@@ -517,7 +547,6 @@
   "w u" 'winner-undo
   "w n" 'evil-window-new
 )
-
 
 ;; FIXME: Figure out how to embed this into the keymapping
 (setq winum-keymap 

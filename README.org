@@ -1,4 +1,7 @@
+:PROPERTIES:
 #+PROPERTY: header args :tangle: init.el
+#+auto_tangle: t
+:END:
 *Remember to run*: ~org-babel-tangle~ *when applying changes*
 * Table of Contents :toc_3:noexport:
 - [[#straight-configuration--package-repositories][Straight Configuration + Package Repositories]]
@@ -15,44 +18,48 @@
 - [[#key-binds][Key binds]]
 - [[#mini-buffer][Mini buffer]]
 - [[#org-mode][Org Mode]]
+  - [[#base-evil-org][Base Evil Org]]
+  - [[#org-agenda][Org Agenda]]
+  - [[#quality-of-life-stuff][Quality of Life Stuff]]
+  - [[#visuals][Visuals]]
 - [[#project-management][Project Management]]
 - [[#terminal][Terminal]]
-- [[#visuals][Visuals]]
+- [[#visuals-1][Visuals]]
 - [[#window-management][Window Management]]
 - [[#key-maps][Key maps]]
 - [[#miscellaneous][Miscellaneous]]
 
 * Straight Configuration + Package Repositories
 #+begin_src emacs-lisp :tangle init.el
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 6))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
-  (straight-use-package 'use-package)
+    (defvar bootstrap-version)
+    (let ((bootstrap-file
+           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+          (bootstrap-version 6))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage))
+    (straight-use-package 'use-package)
 
-  (use-package exec-path-from-shell
-    :straight t
-    :init
-    (when (memq window-system '(mac ns x))
-      (exec-path-from-shell-initialize)))
+    (use-package exec-path-from-shell
+      :straight t
+      :init
+      (when (memq window-system '(mac ns x))
+        (exec-path-from-shell-initialize)))
 
-(setq package-archives ;; if packages fail to download M-x package-refresh-contents
-      '(("melpa" . "https://melpa.org/packages/")
-        ("elpa" . "https://elpa.gnu.org/packages/")))
-(package-initialize)
-(setq use-package-always-ensure t)
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(eval-when-compile (require 'use-package))
+  (setq package-archives ;; if packages fail to download M-x package-refresh-contents
+        '(("melpa" . "https://melpa.org/packages/")
+          ("elpa" . "https://elpa.gnu.org/packages/")))
+  (package-initialize)
+  (setq use-package-always-ensure t)
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (eval-when-compile (require 'use-package))
 #+end_src
 
 * Mac Settings
@@ -161,29 +168,29 @@ General completion
 #+end_src
 * Git
 #+begin_src emacs-lisp :tangle init.el 
-(use-package magit
-  :ensure t
-  :general
-  (setq magit-status-buffer-switch-function 'switch-to-buffer))
-(add-hook 'git-commit-mode-hook 'evil-insert-state)
+  (use-package magit
+    :ensure t
+    :general
+    (setq magit-status-buffer-switch-function 'switch-to-buffer))
+  (add-hook 'git-commit-mode-hook 'evil-insert-state)
 
-(use-package git-gutter
-  :hook (prog-mode . git-gutter-mode)
-  :config
-  (setq git-gutter:update-interval 0.02))
+  (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode) (org-mode . git-gutter-mode)
+    :config
+    (setq git-gutter:update-interval 0.02))
 
-(use-package git-gutter-fringe
-  :config
-  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
-  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
-  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+  (use-package git-gutter-fringe
+    :config
+    (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
-(defun ramon/template-insert-gitignore()
-  (interactive)
-  (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
-         (files (directory-files dir nil ".*\\.gitignore"))
-         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
-    (insert-file-contents (concat dir (concat pick ".gitignore")))))
+  (defun ramon/template-insert-gitignore()
+    (interactive)
+    (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
+           (files (directory-files dir nil ".*\\.gitignore"))
+           (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
+      (insert-file-contents (concat dir (concat pick ".gitignore")))))
 #+end_src
 * Key binds
 #+begin_src emacs-lisp :tangle init.el 
@@ -269,130 +276,167 @@ General completion
 #+end_src
 
 * Org Mode
+** Base Evil Org
 #+begin_src emacs-lisp :tangle init.el 
-(setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
-			      (mapcar
-			       (lambda (directory)
-				 (directory-files-recursively
-				  directory org-agenda-file-regexp))
-			       '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
-			       )))
-(setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
+  (use-package org 
+    :defer t
+    :config
+    (setq org-image-actual-width 400)
+    (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
+          org-priority-faces '((65 :foreground "#FF0000")
+                               (66 :foreground "#0098dd")
+                               (67 :foreground "#da8548")))
 
-(setq org-capture-templates
-      '(
-        ("t" "General Todo")
-            ("te" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+    ;; (setq org-ellipsis "  ⬎ ")
+    (setq org-startup-folded 'show2levels)
+    ;; (setq org-hide-emphasis-markers t)
+    :hook
+    (org-mode . org-indent-mode)
+    (org-mode . toggle-truncate-lines)
+    (org-mode . flyspell-mode))
 
-            ("ts" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 
-            ("td" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+  (use-package evil-org-mode
+    :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
+    :hook ((org-mode . evil-org-mode)
+           (org-mode . (lambda () 
+                         (require 'evil-org)
+                         (evil-normalize-keymaps)
+                         (evil-org-set-key-theme '(textobjects))
+                         (require 'evil-org-agenda)
+                         (evil-org-agenda-set-keys))))
+    :bind
+    ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
+    ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
+    :general
+    (general-nmap
+      :keymaps 'org-mode-map
+      :states 'normal
+      "RET"   #'org-open-at-point))
+#+end_src
+** Org Agenda
+#+begin_src emacs-lisp :tangle init.el
+  (setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
+                                (mapcar
+                                 (lambda (directory)
+                                   (directory-files-recursively
+                                    directory org-agenda-file-regexp))
+                                 '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
+                                 )))
+  (setq org-todo-keywords
+        (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
 
-            ("tw" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
-        ("j" "Journal" entry (file+datetree "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/journal.org")
-         "* %?\nEntered on %U\n  %i\n  %a")
-        ("w" "Work Todo Entries")
-            ("we" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+  (setq org-capture-templates
+        '(
+          ("t" "General Todo")
+              ("te" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
 
-            ("ws" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+              ("ts" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
 
-            ("wd" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
+              ("td" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
 
-            ("ww" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
-             "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
-             :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))))
+              ("tw" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/gtd.org" :maxlevel . 2)))
+          ("j" "Journal" entry (file+datetree "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/journal.org")
+           "* %?\nEntered on %U\n  %i\n  %a")
+          ("w" "Work Todo Entries")
+              ("we" "No Time" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title} %?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
 
-(use-package org
-  :defer t
-  :config
-  (setq org-image-actual-width 400)
-  (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
-	org-priority-faces '((65 :foreground "#FF0000")
-			     (66 :foreground "#0098dd")
-			     (67 :foreground "#da8548")))
+              ("ws" "Scheduled" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t%?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
 
-  (setq org-ellipsis "  ⬎ ")
-  (setq org-startup-folded 'show2levels)
-  (setq org-hide-emphasis-markers t)
-  (setq org-list-demote-modify-bullet
-	'(("+" . "*") ("*" . "-") ("-" . "+")))
-  :hook
-  (org-mode . org-indent-mode)
-  (org-mode . toggle-truncate-lines)
-  (org-mode . flyspell-mode))
+              ("wd" "Deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nDEADLINE: %^t%?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))
 
-(require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-to-list 'org-structure-template-alist '("py" . "src python :results output"))
+              ("ww" "Scheduled & deadline" entry (file "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org")
+               "** %^{Type|HW|READ|TODO|PROJ} %^{Todo title}\nSCHEDULED: %^t DEADLINE: %^t %?" :prepend t :empty-lines-before 0
+               :refile-targets (("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd/work.org" :maxlevel . 2)))))
+#+end_src
+** Quality of Life Stuff
+#+begin_src emacs-lisp :tangle init.el
+  (require 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python :results output"))
 
-(use-package ox-reveal)
+  (use-package ox-reveal)
 
-(use-package evil-org
-  :ensure t
-  :after org
-  :hook (org-mode . (lambda () evil-org-mode))
-  :config
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+  (use-package org-download
+    :straight t
+    :init
+    (add-hook 'dired-mode-hook 'org-download-enable))
 
-(use-package org-download
-  :straight t
-  :init
-  (add-hook 'dired-mode-hook 'org-download-enable))
+  (use-package org-auto-tangle
+    :defer t
+    :hook (org-mode . org-auto-tangle-mode))
 
-(use-package toc-org
-  :straight t
-  :config
-  (if (require 'toc-org nil t)
-      (progn
-	(add-hook 'org-mode-hook 'toc-org-mode)
-	(add-hook 'markdown-mode-hook 'toc-org-mode)
-	(define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
-    (warn "toc-org not found")))
+  (use-package toc-org
+    :straight t
+    :config
+    (if (require 'toc-org nil t)
+        (progn
+          (add-hook 'org-mode-hook 'toc-org-mode)
+          (add-hook 'markdown-mode-hook 'toc-org-mode)
+          (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+      (warn "toc-org not found")))
+#+end_src
+** Visuals
+#+begin_src emacs-lisp :tangle init.el
+  ;; (use-package org-bullets
+  ;;   :straight t)
+  ;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
-(use-package org-bullets
-  :straight t)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (use-package org-modern
+    :straight t
+    :config
+    (setq
+     ;; Edit settings
+     org-auto-align-tags nil
+     org-tags-column 0
+     org-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
 
-(use-package org-fancy-priorities
-  :straight t
-  :hook (org-mode . org-fancy-priorities-mode)
-  :config
-  (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
-  org-todo-keywords '((sequence "HW")))
+     ;; Org styling, hide markup etc.
+     org-hide-emphasis-markers t
+     org-list-demote-modify-bullet
+     '(("+" . "*") ("*" . "-") ("-" . "+"))
+     
+     ;; Agenda styling
+     org-agenda-tags-column 0
+     org-agenda-block-separator ?─
+     org-agenda-time-grid
+     '((daily today require-timed)
+       (800 1000 1200 1400 1600 1800 2000)
+       " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+     org-agenda-current-time-string
+     "⭠ now ─────────────────────────────────────────────────")
 
-(use-package evil-org-mode
-  :straight (evil-org-mode :type git :host github :repo "hlissner/evil-org-mode")
-  :hook ((org-mode . evil-org-mode)
-	 (org-mode . (lambda () 
-		       (require 'evil-org)
-		       (evil-normalize-keymaps)
-		       (evil-org-set-key-theme '(textobjects))
-		       (require 'evil-org-agenda)
-		       (evil-org-agenda-set-keys))))
-  :bind
-  ([remap evil-org-org-insert-heading-respect-content-below] . +org/insert-item-below) ;; "<C-return>" 
-  ([remap evil-org-org-insert-todo-heading-respect-content-below] . +org/insert-item-above) ;; "<C-S-return>" 
-  :general
-  (general-nmap
-    :keymaps 'org-mode-map
-    :states 'normal
-    "RET"   #'org-open-at-point))
+    (global-org-modern-mode))
+
+  (use-package org-fancy-priorities
+    :straight t
+    :hook (org-mode . org-fancy-priorities-mode)
+    :config
+    (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
+    org-todo-keywords '((sequence "HW")))
 #+end_src
 * Project Management
 #+begin_src emacs-lisp :tangle init.el 
@@ -587,7 +631,6 @@ General completion
   "w n" 'evil-window-new
 )
 
-
 ;; FIXME: Figure out how to embed this into the keymapping
 (setq winum-keymap 
     (let ((map (make-sparse-keymap)))
@@ -619,4 +662,3 @@ General completion
 (setq use-dialog-box nil)
 (setq make-backup-files nil)
 #+end_src
-
