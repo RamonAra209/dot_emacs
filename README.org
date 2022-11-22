@@ -1,4 +1,30 @@
-(defvar bootstrap-version)
+#+PROPERTY: header args :tangle: init.el
+*Remember to run*: ~org-babel-tangle~ *when applying changes*
+* Table of Contents :toc_3:noexport:
+- [[#straight-configuration--package-repositories][Straight Configuration + Package Repositories]]
+- [[#mac-settings][Mac Settings]]
+- [[#generalel][General.el]]
+- [[#completion][Completion]]
+  - [[#languages][Languages]]
+    - [[#haskell][Haskell]]
+    - [[#python][Python]]
+    - [[#rust][Rust]]
+  - [[#snippets][Snippets]]
+- [[#dired][Dired]]
+- [[#git][Git]]
+- [[#key-binds][Key binds]]
+- [[#mini-buffer][Mini buffer]]
+- [[#org-mode][Org Mode]]
+- [[#project-management][Project Management]]
+- [[#terminal][Terminal]]
+- [[#visuals][Visuals]]
+- [[#window-management][Window Management]]
+- [[#key-maps][Key maps]]
+- [[#miscellaneous][Miscellaneous]]
+
+* Straight Configuration + Package Repositories
+#+begin_src emacs-lisp :tangle init.el
+  (defvar bootstrap-version)
   (let ((bootstrap-file
          (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
         (bootstrap-version 6))
@@ -27,7 +53,10 @@
   (package-refresh-contents)
   (package-install 'use-package))
 (eval-when-compile (require 'use-package))
+#+end_src
 
+* Mac Settings
+#+begin_src emacs-lisp :tangle init.el 
 (setq frame-resize-pixelwise t)
 (when (eq system-type 'darwin) 
   (setq mac-option-modifier 'alt)
@@ -43,7 +72,10 @@
 (global-set-key (kbd "M-q") 'save-buffers-kill-emacs)
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
+#+end_src
 
+* General.el
+#+begin_src emacs-lisp :tangle init.el 
 (use-package general
   :straight t
   :config
@@ -58,36 +90,50 @@
     :keymaps 'override
     :prefix "SPC"
     :global-prefix "C-SPC"))
+#+end_src
 
-(use-package company ;; TODO add tab completion
-  :straight t
-  :custom
-  (company-minimum-prefix-length 3)
-  :init
-  (setq company-idle-delay 0.01)
-  (global-company-mode)
-  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
+* Completion
+General completion
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package company ;; TODO add tab completion
+    :straight t
+    :custom
+    (company-minimum-prefix-length 3)
+    :init
+    (setq company-idle-delay 0.01)
+    (global-company-mode)
+    (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
 
-(use-package eglot)
+  (use-package eglot)
 
-(use-package flyspell-correct
-  :after flyspell
-  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
+  (use-package flyspell-correct
+    :after flyspell
+    :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
 
-(use-package flyspell-correct-ivy
-  :after flyspell-correct)
-
+  (use-package flyspell-correct-ivy
+    :after flyspell-correct)
+#+end_src
+** Languages
+*** Haskell
+#+begin_src emacs-lisp :tangle init.el 
 (use-package haskell-mode
   :straight t)
-
+#+end_src
+*** Python
+#+begin_src emacs-lisp :tangle init.el 
 (use-package pyvenv) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
 (use-package numpydoc :straight t)
-
+#+end_src
+*** Rust
+#+begin_src emacs-lisp :tangle init.el 
 (use-package rustic ;; remember to: 'brew install rust-analyzer'
   :straight t
   :config
   (setq rustic-cargo-bin "~/.cargo/bin/cargo"))
+#+end_src
 
+** Snippets
+#+begin_src emacs-lisp :tangle init.el 
 (use-package yasnippet
   :straight t
   :config
@@ -97,10 +143,14 @@
 (use-package doom-snippets
   :after yasnippet
   :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
-
+#+end_src
+* Dired
+#+begin_src emacs-lisp :tangle init.el 
 (add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
 (use-package all-the-icons :straight t)
-
+#+end_src
+* Git
+#+begin_src emacs-lisp :tangle init.el 
 (use-package magit
   :ensure t
   :general
@@ -124,7 +174,9 @@
          (files (directory-files dir nil ".*\\.gitignore"))
          (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
     (insert-file-contents (concat dir (concat pick ".gitignore")))))
-
+#+end_src
+* Key binds
+#+begin_src emacs-lisp :tangle init.el 
 (global-set-key (kbd "M-/") 'comment-line)
 (electric-pair-mode)
 
@@ -169,7 +221,10 @@
   :straight t
   :init
   (evil-snipe-mode))
+#+end_src
 
+* Mini buffer
+#+begin_src emacs-lisp :tangle init.el 
 (use-package vertico
   :config
   (vertico-mode)
@@ -201,7 +256,10 @@
   :config
   (setq which-key-idle-delay 1))
 (which-key-mode)
+#+end_src
 
+* Org Mode
+#+begin_src emacs-lisp :tangle init.el 
 (setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
 			      (mapcar
 			       (lambda (directory)
@@ -325,7 +383,9 @@
     :keymaps 'org-mode-map
     :states 'normal
     "RET"   #'org-open-at-point))
-
+#+end_src
+* Project Management
+#+begin_src emacs-lisp :tangle init.el 
 (use-package projectile
   :straight t
   :custom
@@ -345,7 +405,9 @@
 ;;     (dolist (marker project-root-markers)
 ;;       (when (file-exists-p (concat path marker))
 ;; 	(throw 'found marker)))))
-
+#+end_src
+* Terminal
+#+begin_src emacs-lisp :tangle init.el 
 (use-package vterm
   :straight t)
 
@@ -362,72 +424,79 @@
 		 (display-buffer-reuse-window display-buffer-at-bottom)
 		 (reusable-frames . visible)
 		 (window-height . 0.3))))
+#+end_src
+* Visuals
+#+begin_src emacs-lisp :tangle init.el 
+  (setq display-line-numbers-type 'visual)
+  (global-display-line-numbers-mode)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
 
-(setq display-line-numbers-type 'visual)
-(global-display-line-numbers-mode)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
+  (use-package rainbow-delimiters
+    :straight t
+    :hook (prog-mode . rainbow-delimiters-mode))
 
-(use-package rainbow-delimiters
-  :straight t
-  :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package hl-todo
+    :straight t
+    :config
+    (setq hl-todo-keyword-faces
+          '(("TODO"   . "#FF69B4") 
+            ("FIXME"  . "#ea3d54") 
+            ("NOTE"  . "#93C572") 
+            ("REVIEW" . "#A7C7E7")
+            ))
+    :hook (prog-mode . (hl-todo-mode)))
 
-(use-package hl-todo
-  :straight t
-  :config
-  (setq hl-todo-keyword-faces
-        '(("TODO"   . "#FF69B4") 
-          ("FIXME"  . "#ea3d54") 
-          ("NOTE"  . "#93C572") 
-          ("REVIEW" . "#A7C7E7")
-          ))
-  :hook (prog-mode . (hl-todo-mode)))
+  (use-package beacon
+    :straight t
+    :init
+    (beacon-mode))
 
-(use-package beacon
-  :straight t
-  :init
-  (beacon-mode))
+  (use-package dashboard
+    :straight t
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-center-content t)
+    (setq dashboard-banner-logo-title "Don't be a weenie")
+    (setq dashboard-items '((agenda . 15))))
 
-(use-package dashboard
-  :straight t
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-center-content t)
-  (setq dashboard-banner-logo-title "Don't be a weenie")
-  (setq dashboard-items '((agenda . 15))))
+  (use-package ef-themes
+    :straight t)
 
-(use-package ef-themes
-  :straight t)
+  (use-package doom-themes
+    :ensure t
+    :config
+    (setq doom-themes-enable-bold t    
+          doom-themes-enable-italic t) 
+    (doom-themes-visual-bell-config)
+    (doom-themes-neotree-config)
+    (setq doom-themes-treemacs-theme "doom-atom") 
+    (doom-themes-treemacs-config)
+    (doom-themes-org-config))
 
-(use-package doom-themes
-  :ensure t
-  :config
-  (setq doom-themes-enable-bold t    
-        doom-themes-enable-italic t) 
-  (doom-themes-visual-bell-config)
-  (doom-themes-neotree-config)
-  (setq doom-themes-treemacs-theme "doom-atom") 
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config))
+  (load-theme 'doom-old-hope t)
+  (set-face-foreground 'line-number "#708090")
+  (set-face-foreground 'line-number-current-line "#ef7c2b")
 
-(load-theme 'doom-old-hope t)
-(set-face-foreground 'line-number "#708090")
-(set-face-foreground 'line-number-current-line "#ef7c2b")
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :config
+    (setq auto-revert-check-vc-info t)
+    (setq doom-modeline-buffer-encoding nil
+          doom-modeline-enable-word-count nil
+          doom-modeline-major-mode-icon t
+          doom-modeline-major-mode-color-icon t))
+#+end_src
 
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :config
-  (setq auto-revert-check-vc-info t)
-  (setq doom-modeline-buffer-encoding nil
-        doom-modeline-enable-word-count nil
-        doom-modeline-major-mode-icon t
-        doom-modeline-major-mode-color-icon t))
-
+* Window Management
+#+begin_src emacs-lisp :tangle init.el 
 (use-package winum :straight t :init (winum-mode))
 (winner-mode 1)
-
+#+end_src
+* Key maps
+#+begin_src emacs-lisp :tangle init.el 
 (general-imap 
   :keymaps 'vterm-mode-map
   "C-c" 'vterm-send-C-c)
@@ -524,7 +593,9 @@
       (leader-key-def "w 7" 'winum-select-window-7)
       (leader-key-def "w 8" 'winum-select-window-8)
       map))
-
+#+end_src
+* Miscellaneous
+#+begin_src emacs-lisp :tangle init.el 
 (eldoc-mode -1)
 (save-place-mode 1)
 (global-auto-revert-mode 1)
@@ -537,3 +608,5 @@
 (setq scroll-conservatively 101)
 (setq use-dialog-box nil)
 (setq make-backup-files nil)
+#+end_src
+
