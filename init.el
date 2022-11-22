@@ -100,6 +100,16 @@
 
 (add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
 (use-package all-the-icons :straight t)
+(use-package dirvish
+  :config
+  (setq dirvish-mode-line-format
+        '(:left (sort symlink) :right (omit yank index)))
+  (setq dirvish-attributes
+        '(all-the-icons file-time file-size collapse subtree-state vc-state git-msg))
+  (setq insert-directory-program "gls" dired-use-ls-dired t)     ;; needs coreutils: 'brew install coreutils'
+  (setq dired-listing-switches "-al --group-directories-first")  ;; needs coreutils: 'brew install coreutils' 
+  :init
+  (dirvish-override-dired-mode))
 
 (use-package magit
   :ensure t
