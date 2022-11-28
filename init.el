@@ -59,48 +59,17 @@
     :prefix "SPC"
     :global-prefix "C-SPC"))
 
-(use-package company ;; TODO add tab completion
-  :straight t
-  :custom
-  (company-minimum-prefix-length 3)
-  :init
-  (setq company-idle-delay 0.01)
-  (global-company-mode)
-  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
-
-(use-package eglot)
-
-(use-package flyspell-correct
-  :after flyspell
-  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
-
-(use-package flyspell-correct-ivy
-  :after flyspell-correct)
-
-(use-package haskell-mode
-  :straight t)
-
-(use-package pyvenv) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
-(use-package numpydoc :straight t)
-
-(use-package rustic ;; remember to: 'brew install rust-analyzer'
-  :straight t
-  :config
-  (setq rustic-cargo-bin "~/.cargo/bin/cargo"))
-
-(use-package yasnippet
-  :straight t
-  :config
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (yas-global-mode))
-
-(use-package doom-snippets
-  :after yasnippet
-  :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
-
 (add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
+
 (use-package all-the-icons :straight t)
+
 (use-package dirvish
+   :custom
+(dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+ '(("h" "~/"                          "Home")
+   ("d" "~/Downloads/"                "Downloads")
+   ("D" "~/Developer/"                "Developer")
+   ))
   :config
   (setq dirvish-mode-line-format
         '(:left (sort symlink) :right (omit yank index)))
@@ -131,8 +100,8 @@
 (defun ramon/template-insert-gitignore()
   (interactive)
   (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
-         (files (directory-files dir nil ".*\\.gitignore"))
-         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
+	 (files (directory-files dir nil ".*\\.gitignore"))
+	 (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
     (insert-file-contents (concat dir (concat pick ".gitignore")))))
 
 (global-set-key (kbd "M-/") 'comment-line)
@@ -215,15 +184,12 @@
 (use-package org 
   :defer t
   :config
-  (setq org-image-actual-width 400)
-  (setq org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
-        org-priority-faces '((65 :foreground "#FF0000")
-                             (66 :foreground "#0098dd")
-                             (67 :foreground "#da8548")))
-
-  ;; (setq org-ellipsis "  ⬎ ")
-  (setq org-startup-folded 'show2levels)
-  ;; (setq org-hide-emphasis-markers t)
+  (setq
+   org-image-actual-width 400
+   org-agenda-skip-scheduled-if-done t ;; for setting todo priority colors
+   org-priority-faces '((65 :foreground "#FF0000")
+                        (66 :foreground "#0098dd")
+                        (67 :foreground "#da8548")))
   :hook
   (org-mode . org-indent-mode)
   (org-mode . toggle-truncate-lines)
@@ -255,13 +221,13 @@
     :states 'normal
     "RET"   #'org-open-at-point))
 
-(setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
-                              (mapcar
-                               (lambda (directory)
-                                 (directory-files-recursively
-                                  directory org-agenda-file-regexp))
-                               '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
-                               )))
+;; (setq org-agenda-files (apply 'append ;; Fix this, ethan said setqs go under custom
+;;                              (mapcar
+;;                               (lambda (directory)
+;;                                 (directory-files-recursively
+;;                                  directory org-agenda-file-regexp))
+;;                               '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
+;;                               )))
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
 
@@ -306,6 +272,9 @@
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python :results output"))
 
+(use-package ox-pandoc
+  :straight t)
+
 (use-package ox-reveal)
 
 (use-package org-download
@@ -317,19 +286,35 @@
   :defer t
   :hook (org-mode . org-auto-tangle-mode))
 
+(defun org-babel-edit-prep:python (babel-info) 
+  ;; to add more language support, see:
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/2842#issuecomment-870807018
+  (setq-local buffer-file-name (->> babel-info caddr (alist-get :tangle)))
+  (lsp))
+
+(defun org-babel-edit-prep:rust (babel-info) 
+  ;; to add more language support, see:
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/2842#issuecomment-870807018
+  (setq-local buffer-file-name (->> babel-info caddr (alist-get :tangle)))
+  (lsp))
+
 (use-package toc-org
   :straight t
   :config
   (if (require 'toc-org nil t)
       (progn
         (add-hook 'org-mode-hook 'toc-org-mode)
-        (add-hook 'markdown-mode-hook 'toc-org-mode)
-        (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point))
+        ;; (add-hook 'markdown-mode-hook 'toc-org-mode)
+        ;; (define-key markdown-mode-map (kbd "\C-c\C-o") 'toc-org-markdown-follow-thing-at-point)
+        )
     (warn "toc-org not found")))
 
-;; (use-package org-bullets
-;;   :straight t)
-;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(use-package org-fancy-priorities
+  :straight t
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
+  org-todo-keywords '((sequence "HW")))
 
 (use-package org-modern
   :straight t
@@ -343,7 +328,10 @@
    org-insert-heading-respect-content t
 
    ;; Org styling, hide markup etc.
+   org-ellipsis "  ⬎ "
+   org-modern-table nil
    org-hide-emphasis-markers t
+   org-startup-folded 'show2levels
    org-list-demote-modify-bullet
    '(("+" . "*") ("*" . "-") ("-" . "+"))
 
@@ -359,32 +347,97 @@
 
   (global-org-modern-mode))
 
-(use-package org-fancy-priorities
-  :straight t
-  :hook (org-mode . org-fancy-priorities-mode)
-  :config
-  (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
-  org-todo-keywords '((sequence "HW")))
+(use-package haskell-mode
+  :straight t)
 
-(use-package projectile
+(use-package python)
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1)) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
+(use-package numpydoc :straight t)
+
+(use-package rustic ;; remember to: 'brew install rust-analyzer'
+  :straight t
+  :config
+  (setq rustic-cargo-bin "~/.cargo/bin/cargo"))
+
+(use-package yasnippet
+  :straight t
+  :config
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode))
+
+(use-package doom-snippets
+  :after yasnippet
+  :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
+
+(use-package company ;; TODO add tab completion
+  :straight t
+  :custom
+  (company-minimum-prefix-length 3)
+  (company-idle-delay 0.01)
+  :init
+  (global-company-mode)
+  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
+
+;; (use-package corfu
+;;   :straight t
+;;   :defer t
+;;   :custom
+;;   (corfu-auto t)
+;;   (corfu-auto-prefix 3)
+;;   (corfu-auto-delay 0.0)           ; Enable auto completion
+;;   (corfu-quit-at-boundary 'separator)
+;;   (corfu-echo-documentation 0.25)   ; Enable auto completion
+;;   (corfu-preview-current 'insert)   ; Do not preview current candidate
+;;   ;; :init
+;;   ;; (global-corfu-mode)
+;;   :hook
+;;   (prog-mode . corfu-mode))
+
+;; (use-package eglot
+;;   :ensure t
+;;   :defer t
+;;   :hook
+;;   (python-mode . eglot-ensure)
+;;   (rust-mode . eglot-ensure)
+;;   )
+
+(use-package lsp-mode
+  :straight t
+  :config
+  (setq lsp-headerline-breadcrumb-mode nil)
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+         (python-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+(use-package lsp-pyright
+  :straight t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+
+(use-package flyspell-correct
+  :after flyspell
+  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
+
+(use-package flyspell-correct-ivy
+  :after flyspell-correct)
+
+(use-package origami
+  :defer t
+  :hook (prog-mode . origami-mode))
+
+(use-package projectile ;; remmeber, `brew install ripgrep`
   :straight t
   :custom
   (projectile-switch-project-action #'projectile-dired)
-  :config (projectile-mode)
-  (setq projectile-ignored-projects '("~/"))) ;; TODO Figure this out
-
-;; (defcustom project-root-markers ;; yoinked from: https://andreyorst.gitlab.io/posts/2022-07-16-project-el-enhancements/
-;;   '("Cargo.toml" ".git" "main.py" ".root")
-;;   "Files or directories that indicate the root of a project."
-;;   :type '(repeat string)
-;;   :group 'project)
-
-;; (defun project-root-p (path)
-;;   "Check if the current PATH has any of the project root markers."
-;;   (catch 'found
-;;     (dolist (marker project-root-markers)
-;;       (when (file-exists-p (concat path marker))
-;; 	(throw 'found marker)))))
+  :init (projectile-mode))
 
 (use-package vterm
   :straight t)
@@ -394,14 +447,14 @@
   :config
   (setq vterm-toggle-fullscreen-p nil)
   (add-to-list 'display-buffer-alist
-	       '((lambda (buffer-or-name _)
-		   (let ((buffer (get-buffer buffer-or-name)))
-		     (with-current-buffer buffer
-		       (or (equal major-mode 'vterm-mode)
-			   (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
-		 (display-buffer-reuse-window display-buffer-at-bottom)
-		 (reusable-frames . visible)
-		 (window-height . 0.3))))
+               '((lambda (buffer-or-name _)
+                   (let ((buffer (get-buffer buffer-or-name)))
+                     (with-current-buffer buffer
+                       (or (equal major-mode 'vterm-mode)
+                           (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+                 (display-buffer-reuse-window display-buffer-at-bottom)
+                 (reusable-frames . visible)
+                 (window-height . 0.3))))
 
 (setq display-line-numbers-type 'visual)
 (global-display-line-numbers-mode)
@@ -413,16 +466,16 @@
   :straight t
   :hook (prog-mode . rainbow-delimiters-mode))
 
-(use-package hl-todo
-  :straight t
-  :config
-  (setq hl-todo-keyword-faces
-        '(("TODO"   . "#FF69B4") 
-          ("FIXME"  . "#ea3d54") 
-          ("NOTE"  . "#93C572") 
-          ("REVIEW" . "#A7C7E7")
-          ))
-  :hook (prog-mode . (hl-todo-mode)))
+;; (use-package hl-todo ;; This package caused all my headaches >.<
+;;   :straight t
+;;   :config
+;;   (setq hl-todo-keyword-faces
+;; 	'(("TODO"   . "#FF69B4") 
+;; 	  ("FIXME"  . "#ea3d54") 
+;; 	  ("NOTE"  . "#93C572") 
+;; 	  ("REVIEW" . "#A7C7E7")
+;; 	  ))
+;;   :hook (prog-mode . (hl-todo-mode)))
 
 (use-package beacon
   :straight t
@@ -444,7 +497,7 @@
   :ensure t
   :config
   (setq doom-themes-enable-bold t    
-        doom-themes-enable-italic t) 
+	doom-themes-enable-italic t) 
   (doom-themes-visual-bell-config)
   (doom-themes-neotree-config)
   (setq doom-themes-treemacs-theme "doom-atom") 
@@ -461,9 +514,9 @@
   :config
   (setq auto-revert-check-vc-info t)
   (setq doom-modeline-buffer-encoding nil
-        doom-modeline-enable-word-count nil
-        doom-modeline-major-mode-icon t
-        doom-modeline-major-mode-color-icon t))
+	doom-modeline-enable-word-count nil
+	doom-modeline-major-mode-icon t
+	doom-modeline-major-mode-color-icon t))
 
 (use-package winum :straight t :init (winum-mode))
 (winner-mode 1)
@@ -485,10 +538,15 @@
   "," 'switch-to-buffer
 
   "RET" '(consult-bookmark :which-key "bookmarks")
+  "TAB" 'dirvish-subtree-toggle
 
   "b" '(:ignore t :which-key "Buffer")
+  "b b " 'switch-to-buffer
   "b k" 'image-kill-buffer
   "b r" '(revert-buffer :which-key "refresh-buffer")
+
+  "e" '(:ignore t :which-key "Evil")
+  "e f" 'evil-toggle-fold
 
   "f" '(:ignore t :which-key "Find")
   "f f" 'find-file
@@ -506,8 +564,8 @@
   "h r r" 'eval-defun
 
   "l" '(:ignore t :which-key "LSP")
-  "l a" '(eglot :which-key "activate lsp")
-  "l r" '(eglot-rename :which-key "rename variable")
+  "l a" '(lsp :which-key "activate lsp")
+  "l r" '(lsp-rename :which-key "rename variable")
 
   "m" '(:ignore t :which-key "Prog Mode")
   "m p" '(:ignore t :which-key "Python")
@@ -537,6 +595,7 @@
 
   "p" '(:ignore t :which-key "Projectile")
   "p p" 'projectile-find-file
+  "p g" '(projectile-ripgrep :which-key "grep-project")
 
   "t" '(:ignore t :which-key "Toggle")
   "t t" 'vterm-toggle
@@ -564,6 +623,9 @@
       (leader-key-def "w 8" 'winum-select-window-8)
       map))
 
+(setq max-lisp-eval-depth 10000)  ;; Debugging 
+(setq debug-on-error t)           ;; Debugging 
+
 (eldoc-mode -1)
 (save-place-mode 1)
 (global-auto-revert-mode 1)
@@ -576,3 +638,45 @@
 (setq scroll-conservatively 101)
 (setq use-dialog-box nil)
 (setq make-backup-files nil)
+
+(defun ramon/call-logging-hooks (command &optional verbose)
+  "Call COMMAND, reporting every hook run in the process.
+  Interactively, prompt for a command to execute.
+
+  Return a list of the hooks run, in the order they were run.
+  Interactively, or with optional argument VERBOSE, also print a
+  message listing the hooks."
+  (interactive "CCommand to log hooks: \np")
+  (let* ((log     nil)
+         (logger (lambda (&rest hooks) 
+                   (setq log (append log hooks nil)))))
+    (ramon/with-advice
+        ((#'run-hooks :before logger))
+      (call-interactively command))
+    (when verbose
+      (message
+       (if log "Hooks run during execution of %s:"
+         "No hooks run during execution of %s.")
+       command)
+      (dolist (hook log)
+        (message "> %s" hook)))
+    log))
+
+(defmacro ramon/with-advice (adlist &rest body)
+  "Execute BODY with temporary advice in ADLIST.
+
+Each element of ADLIST should be a list of the form
+  (SYMBOL WHERE FUNCTION [PROPS])
+suitable for passing to `advice-add'.  The BODY is wrapped in an
+`unwind-protect' form, so the advice will be removed even in the
+event of an error or nonlocal exit."
+  (declare (debug ((&rest (&rest form)) body))
+           (indent 1))
+  `(progn
+     ,@(mapcar (lambda (adform)
+                 (cons 'advice-add adform))
+               adlist)
+     (unwind-protect (progn ,@body)
+       ,@(mapcar (lambda (adform)
+                   `(advice-remove ,(car adform) ,(nth 2 adform)))
+                 adlist))))
