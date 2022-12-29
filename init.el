@@ -1,22 +1,16 @@
 (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 6))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
-  (straight-use-package 'use-package)
-
-  (use-package exec-path-from-shell
-    :straight t
-    :init
-    (when (memq window-system '(mac ns x))
-      (exec-path-from-shell-initialize)))
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+(straight-use-package 'use-package)
 
 (setq package-archives ;; if packages fail to download M-x package-refresh-contents
       '(("melpa" . "https://melpa.org/packages/")
@@ -27,6 +21,12 @@
   (package-refresh-contents)
   (package-install 'use-package))
 (eval-when-compile (require 'use-package))
+
+(use-package exec-path-from-shell
+  :straight t
+  :init
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
 
 (setq frame-resize-pixelwise t)
 (when (eq system-type 'darwin) 
@@ -98,10 +98,11 @@
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
 (defun ramon/template-insert-gitignore()
+  "Insert .gitignore for specified language"
   (interactive)
   (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
-	 (files (directory-files dir nil ".*\\.gitignore"))
-	 (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
+         (files (directory-files dir nil ".*\\.gitignore"))
+         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
     (insert-file-contents (concat dir (concat pick ".gitignore")))))
 
 (global-set-key (kbd "M-/") 'comment-line)
@@ -149,6 +150,9 @@
   :init
   (evil-snipe-mode))
 
+(use-package avy
+  :straight t)
+
 (use-package vertico
   :config
   (vertico-mode)
@@ -182,6 +186,7 @@
 (which-key-mode)
 
 (use-package org 
+  :straight t
   :defer t
   :config
   (setq
@@ -276,6 +281,9 @@
   :straight t)
 
 (use-package ox-reveal)
+(setq org-reveal-root "/Users/tahpramen/reveal.js-master")
+(use-package htmlize ;; Needed for syntax highlighting in ord->reveal presentation
+  :straight t)
 
 (use-package org-download
   :straight t
@@ -298,6 +306,9 @@
   (setq-local buffer-file-name (->> babel-info caddr (alist-get :tangle)))
   (lsp))
 
+(org-babel-do-load-languages
+ 'org-babel-load-languages '((python . t)))
+
 (use-package toc-org
   :straight t
   :config
@@ -316,36 +327,17 @@
   (setq org-fancy-priorities-list '("HIGH" "MEDIUM" "LOW"))
   org-todo-keywords '((sequence "HW")))
 
-(use-package org-modern
-  :straight t
-  :config
-  (setq
-   ;; Edit settings
-   org-auto-align-tags nil
-   org-tags-column 0
-   org-catch-invisible-edits 'show-and-error
-   org-special-ctrl-a/e t
-   org-insert-heading-respect-content t
+(use-package org-bullets
+  :hook
+  (org-mode . org-bullets-mode))
 
-   ;; Org styling, hide markup etc.
-   org-ellipsis "  ⬎ "
-   org-modern-table nil
-   org-hide-emphasis-markers t
-   org-startup-folded 'show2levels
-   org-list-demote-modify-bullet
-   '(("+" . "*") ("*" . "-") ("-" . "+"))
 
-   ;; Agenda styling
-   org-agenda-tags-column 0
-   org-agenda-block-separator ?─
-   org-agenda-time-grid
-   '((daily today require-timed)
-     (800 1000 1200 1400 1600 1800 2000)
-     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-   org-agenda-current-time-string
-   "⭠ now ─────────────────────────────────────────────────")
-
-  (global-org-modern-mode))
+(setq org-ellipsis "  ⬎ ")
+(setq org-hide-emphasis-markers t)
+(setq org-startup-folded 'show2levels)
+(setq org-insert-heading-respect-content t)
+(setq org-list-demote-modify-bullet
+      '(("+" . "*") ("*" . "-") ("-" . "+")))
 
 (use-package haskell-mode
   :straight t)
@@ -550,6 +542,7 @@
 
   "f" '(:ignore t :which-key "Find")
   "f f" 'find-file
+  "f w" '(avy-goto-char-timer :which-key "avy-find-word")
 
   "g" '(:ignore t :which-key "Git")
   "g g" 'magit-status
@@ -623,8 +616,13 @@
       (leader-key-def "w 8" 'winum-select-window-8)
       map))
 
+(add-hook 'org-mode-hook (lambda () (local-unset-key (kbd "M-h"))))
+
+(use-package ein
+  :straight t)
+
 (setq max-lisp-eval-depth 10000)  ;; Debugging 
-(setq debug-on-error t)           ;; Debugging 
+;; (setq debug-on-error t)           ;; Debugging 
 
 (eldoc-mode -1)
 (save-place-mode 1)
@@ -680,3 +678,6 @@ event of an error or nonlocal exit."
        ,@(mapcar (lambda (adform)
                    `(advice-remove ,(car adform) ,(nth 2 adform)))
                  adlist))))
+
+(load "~/.emacs.d/chatgpt.el")
+(require 'chatgpt)
