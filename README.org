@@ -635,14 +635,24 @@
     :config
     (setq auto-revert-check-vc-info t)
     (setq doom-modeline-buffer-encoding nil
-	  doom-modeline-enable-word-count nil
-	  doom-modeline-major-mode-icon t
-	  doom-modeline-major-mode-color-icon t))
+          doom-modeline-enable-word-count nil
+          doom-modeline-major-mode-icon t
+          doom-modeline-major-mode-color-icon t))
 #+end_src
 * Window Management
 #+begin_src emacs-lisp :tangle init.el 
-(use-package winum :straight t :init (winum-mode))
-(winner-mode 1)
+  (use-package winum :straight t :init (winum-mode))
+  (winner-mode 1)
+
+  (use-package perspective
+    :straight t
+    :config
+    (global-set-key (kbd "M-w") 'persp-switch)
+    (global-set-key (kbd "M-k") 'persp-kill)
+    :init
+    (setq persp-initial-frame-name "Main")
+    (setq persp-suppress-no-prefix-key-warning t)
+    (persp-mode))
 #+end_src
 * Key maps
 #+begin_src emacs-lisp :tangle init.el 
@@ -721,6 +731,10 @@
     "w v" 'evil-window-vsplit
     "w u" 'winner-undo
     "w n" 'evil-window-new
+    "w l" 'evil-window-move-far-right
+    "w h" 'evil-window-move-far-left
+    "w j" 'evil-window-move-very-bottom
+    "w k" 'evil-window-move-very-top
   )
 
   ;; FIXME: Figure out how to embed this into the keymapping
