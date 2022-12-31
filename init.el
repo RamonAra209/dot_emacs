@@ -340,9 +340,6 @@
 (setq org-list-demote-modify-bullet
       '(("+" . "*") ("*" . "-") ("-" . "+")))
 
-(use-package haskell-mode
-  :straight t)
-
 (use-package python)
 (use-package pyvenv
   :config
@@ -679,6 +676,3 @@ event of an error or nonlocal exit."
        ,@(mapcar (lambda (adform)
                    `(advice-remove ,(car adform) ,(nth 2 adform)))
                  adlist))))
-
-(load "~/.emacs.d/chatgpt.el")
-(require 'chatgpt)

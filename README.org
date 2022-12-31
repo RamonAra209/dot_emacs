@@ -20,7 +20,6 @@
   - [[#visuals][Visuals]]
 - [[#completion][Completion]]
   - [[#languages][Languages]]
-    - [[#haskell][Haskell]]
     - [[#python][Python]]
     - [[#rust][Rust]]
     - [[#yaml][Yaml]]
@@ -407,11 +406,6 @@
 #+end_src
 * Completion
 ** Languages
-*** Haskell
-#+begin_src emacs-lisp :tangle init.el 
-(use-package haskell-mode
-  :straight t)
-#+end_src
 *** Python
 #+begin_src emacs-lisp :tangle init.el 
     (use-package python)
@@ -775,7 +769,4 @@
          ,@(mapcar (lambda (adform)
                      `(advice-remove ,(car adform) ,(nth 2 adform)))
                    adlist))))
-
-  (load "~/.emacs.d/chatgpt.el")
-  (require 'chatgpt)
 #+end_src
