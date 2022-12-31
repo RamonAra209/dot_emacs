@@ -111,6 +111,10 @@
   (electric-pair-mode)
 
   (use-package undo-fu)
+  (use-package undo-fu-session
+    :straight t
+    :init
+    (global-undo-fu-session-mode))
 
   (use-package evil
     :demand t
@@ -429,8 +433,11 @@
     "m a" 'pyvenv-activate
     "m k" 'pyvenv-deactivate
     "m m" 'pyvenv-menu
-    "m d" 'numpydoc-generate
+    "m d g" 'numpydoc-generate
   )
+  
+  (use-package ein
+    :straight t)
 #+end_src
 *** Rust
 #+begin_src emacs-lisp :tangle init.el 
@@ -529,6 +536,14 @@
   (use-package origami
     :defer t
     :hook (prog-mode . origami-mode))
+
+  (use-package devdocs
+    :straight t
+    :config
+    (leader-key-def
+      "m d l" 'devdocs-lookup
+      "m d d" 'devdocs-delete
+      "m d i" 'devdocs-install))
 #+end_src
 * Project Management
 #+begin_src emacs-lisp :tangle init.el 
@@ -556,6 +571,9 @@
                    (display-buffer-reuse-window display-buffer-at-bottom)
                    (reusable-frames . visible)
                    (window-height . 0.3))))
+
+  (use-package tldr
+    :straight t)
 #+end_src
 * Visuals
 #+begin_src emacs-lisp :tangle init.el 
@@ -600,7 +618,7 @@
     :ensure t
     :config
     (setq doom-themes-enable-bold t    
-	  doom-themes-enable-italic t) 
+          doom-themes-enable-italic t) 
     (doom-themes-visual-bell-config)
     (doom-themes-neotree-config)
     (setq doom-themes-treemacs-theme "doom-atom") 
@@ -676,6 +694,7 @@
     "l r" '(lsp-rename :which-key "rename variable")
 
     "m" '(:ignore t :which-key "Mode-Specific")
+    "m d" '(:ignore t :which-key "Documentation")
 
     "o" '(:ignore t :which-key "Org")
     "o a" 'org-agenda
@@ -724,9 +743,6 @@
 #+end_src
 * Miscellaneous
 #+begin_src emacs-lisp :tangle init.el 
-  (use-package ein
-    :straight t)
-
   (setq max-lisp-eval-depth 10000)  ;; Debugging 
   ;; (setq debug-on-error t)           ;; Debugging 
   ;; (setq debug-on-message "Package cl is deprecated")
