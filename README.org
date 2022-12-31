@@ -408,11 +408,21 @@
 ** Languages
 *** Python
 #+begin_src emacs-lisp :tangle init.el 
-    (use-package python)
-    (use-package pyvenv
-      :config
-      (pyvenv-mode 1)) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
-    (use-package numpydoc :straight t)
+  (use-package python)
+  (use-package pyvenv
+    :config
+    (pyvenv-mode 1)) ;; TODO Have it so that it automatically restarts the lsp session on venv activation
+  (use-package numpydoc :straight t)
+
+  (leader-key-def
+    :keymaps 'python-mode-map
+    "m " '(:ignore t :which-key "Python")
+    "m c" 'pyvenv-create
+    "m a" 'pyvenv-activate
+    "m k" 'pyvenv-deactivate
+    "m m" 'pyvenv-menu
+    "m d" 'numpydoc-generate
+  )
 #+end_src
 *** Rust
 #+begin_src emacs-lisp :tangle init.el 
@@ -420,6 +430,14 @@
     :straight t
     :config
     (setq rustic-cargo-bin "~/.cargo/bin/cargo"))
+
+  (leader-key-def
+    :keymaps 'rust-mode-map
+    "m r" 'rustic-cargo-run
+    "m b" 'rustic-cargo-build
+    "m c" 'rustic-cargo-check
+    "m C" 'rustic-cargo-clippy
+  )
 #+end_src
 *** Yaml
 #+begin_src emacs-lisp
@@ -649,18 +667,7 @@
     "l a" '(lsp :which-key "activate lsp")
     "l r" '(lsp-rename :which-key "rename variable")
 
-    "m" '(:ignore t :which-key "Prog Mode")
-    "m p" '(:ignore t :which-key "Python")
-    "m p c" 'pyvenv-create
-    "m p a" 'pyvenv-activate
-    "m p k" 'pyvenv-deactivate
-    "m p m" 'pyvenv-menu
-    "m p d" 'numpydoc-generate
-    "m r" '(:ignore t :which-key "Rust")
-    "m r r" 'rustic-cargo-run
-    "m r b" 'rustic-cargo-build
-    "m r c" 'rustic-cargo-check
-    "m r C" 'rustic-cargo-clippy
+    "m" '(:ignore t :which-key "Mode-Specific")
 
     "o" '(:ignore t :which-key "Org")
     "o a" 'org-agenda
