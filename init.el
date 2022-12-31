@@ -42,6 +42,7 @@
 
 (global-set-key (kbd "M-q") 'save-buffers-kill-emacs)
 (global-set-key (kbd "M-h") 'ns-do-hide-emacs)
+(global-set-key (kbd "M-v") 'yank)
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
 
 (use-package general
