@@ -60,52 +60,6 @@
     :prefix "SPC"
     :global-prefix "C-SPC"))
 
-(add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
-
-(use-package all-the-icons :straight t)
-
-(use-package dirvish
-   :custom
-(dirvish-quick-access-entries ; It's a custom option, `setq' won't work
- '(("h" "~/"                          "Home")
-   ("d" "~/Downloads/"                "Downloads")
-   ("D" "~/Developer/"                "Developer")
-   ))
-  :config
-  (setq dirvish-mode-line-format
-        '(:left (sort symlink) :right (omit yank index)))
-  (setq dirvish-attributes
-        '(all-the-icons file-time file-size collapse subtree-state vc-state git-msg))
-  (setq insert-directory-program "gls" dired-use-ls-dired t)     ;; needs coreutils: 'brew install coreutils'
-  (setq dired-listing-switches "-al --group-directories-first")  ;; needs coreutils: 'brew install coreutils' 
-  :init
-  (dirvish-override-dired-mode))
-
-(use-package magit
-  :ensure t
-  :general
-  (setq magit-status-buffer-switch-function 'switch-to-buffer))
-(add-hook 'git-commit-mode-hook 'evil-insert-state)
-
-(use-package git-gutter
-  :hook (prog-mode . git-gutter-mode) (org-mode . git-gutter-mode)
-  :config
-  (setq git-gutter:update-interval 0.02))
-
-(use-package git-gutter-fringe
-  :config
-  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
-  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
-  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
-
-(defun ramon/template-insert-gitignore()
-  "Insert .gitignore for specified language"
-  (interactive)
-  (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
-         (files (directory-files dir nil ".*\\.gitignore"))
-         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
-    (insert-file-contents (concat dir (concat pick ".gitignore")))))
-
 (global-set-key (kbd "M-/") 'comment-line)
 (electric-pair-mode)
 
@@ -153,6 +107,60 @@
 
 (use-package avy
   :straight t)
+
+(use-package magit
+  :ensure t
+  :general
+  (setq magit-status-buffer-switch-function 'switch-to-buffer))
+(add-hook 'git-commit-mode-hook 'evil-insert-state)
+
+(use-package git-gutter
+  :hook (prog-mode . git-gutter-mode) (org-mode . git-gutter-mode)
+  :config
+  (setq git-gutter:update-interval 0.02))
+
+(use-package git-gutter-fringe
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+
+(defun ramon/template-insert-gitignore()
+  "Insert .gitignore for specified language"
+  (interactive)
+  (let* ((dir (concat "~/.emacs.d/" "templates/gitignore/"))
+         (files (directory-files dir nil ".*\\.gitignore"))
+         (pick (yas-choose-value (mapcar #'file-name-sans-extension files))))
+    (insert-file-contents (concat dir (concat pick ".gitignore")))))
+
+(add-hook 'dired-mode-hook (lambda () dired-hide-details-mode))
+
+(use-package all-the-icons :straight t)
+
+(use-package dirvish
+   :custom
+(dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+ '(("h" "~/"                          "Home")
+   ("d" "~/Downloads/"                "Downloads")
+   ("D" "~/Developer/"                "Developer")
+   ))
+  :config
+  (setq dirvish-mode-line-format
+        '(:left (sort symlink) :right (omit yank index)))
+  (setq dirvish-attributes
+        '(all-the-icons file-time file-size collapse subtree-state vc-state git-msg))
+  (setq insert-directory-program "gls" dired-use-ls-dired t)     ;; needs coreutils: 'brew install coreutils'
+  (setq dired-listing-switches "-al --group-directories-first")  ;; needs coreutils: 'brew install coreutils' 
+  :init
+  (dirvish-override-dired-mode))
+
+;; (general-define-key
+;;  :states 'override
+;;  :keymaps 'dirvish-mode-map
+;;  "TAB" 'dirvish-subtree-toggle
+;; )
+
+(evil-define-key 'normal dirvish-mode-map (kbd "TAB") 'dirvish-subtree-toggle)
 
 (use-package vertico
   :config
@@ -628,6 +636,7 @@
 
 (setq max-lisp-eval-depth 10000)  ;; Debugging 
 ;; (setq debug-on-error t)           ;; Debugging 
+;; (setq debug-on-message "Package cl is deprecated")
 
 (eldoc-mode -1)
 (save-place-mode 1)
