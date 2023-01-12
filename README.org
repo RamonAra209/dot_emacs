@@ -307,6 +307,8 @@
   ;;                                  directory org-agenda-file-regexp))
   ;;                               '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd")
   ;;                               )))
+  (setq org-agenda-files '("~/Library/Mobile Documents/com~apple~CloudDocs/Documents/gtd"))
+
   (setq org-todo-keywords
         (quote ((sequence "TODO(t)" "DOING(g)" "|" "DONE(d)"))))
 
