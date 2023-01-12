@@ -650,8 +650,8 @@
   (use-package perspective
     :straight t
     :config
-    (global-set-key (kbd "M-w") 'persp-switch)
-    (global-set-key (kbd "M-k") 'persp-kill)
+    (global-set-key (kbd "M-t") 'persp-switch)
+    (global-set-key (kbd "M-w") 'persp-kill)
     :init
     (setq persp-initial-frame-name "Main")
     (setq persp-suppress-no-prefix-key-warning t)
