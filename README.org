@@ -47,7 +47,7 @@
         (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
   (straight-use-package 'use-package)
-  
+
   (setq package-archives ;; if packages fail to download M-x package-refresh-contents
         '(("melpa" . "https://melpa.org/packages/")
           ("elpa" . "https://elpa.gnu.org/packages/")))
@@ -107,7 +107,8 @@
 #+end_src
 * Key binds
 #+begin_src emacs-lisp :tangle init.el 
-  (global-set-key (kbd "M-/") 'comment-line)
+  ;; (global-set-key (kbd "M-/") 'comment-line)
+  (global-set-key (kbd "M-/") 'comment-dwim) 
   (electric-pair-mode)
 
   (use-package undo-fu)
@@ -380,7 +381,7 @@
     ;; https://github.com/emacs-lsp/lsp-mode/issues/2842#issuecomment-870807018
     (setq-local buffer-file-name (->> babel-info caddr (alist-get :tangle)))
     (lsp))
-  
+
   (org-babel-do-load-languages
    'org-babel-load-languages '((python . t)))
 
@@ -435,7 +436,7 @@
     "m m" 'pyvenv-menu
     "m d g" 'numpydoc-generate
   )
-  
+
   (use-package ein
     :straight t)
 #+end_src
